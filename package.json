@@ -18,7 +18,9 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bin": "./dist/cli.js",
+  "bin": {
+    "revlog-converter": "./dist/cli.js"
+  },
   "files": [
     "dist"
   ],
