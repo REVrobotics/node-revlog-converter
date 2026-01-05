@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo "Running formatter..."
+npm run format
+
+echo "Running linter-fixer..."
+npm run lint:fix

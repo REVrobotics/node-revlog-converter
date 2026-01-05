@@ -1,0 +1,272 @@
+
+VERSION ""
+
+
+NS_ :
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER_
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_:
+
+BO_ 2349137920 SET_SERVO_0_TO_2_PULSE_WIDTHS: 7 Vector__XXX
+ SG_ PULSE_WIDTH_0 : 0|16@1+ (1,0) [0|0] "uS" Vector__XXX
+ SG_ PULSE_WIDTH_1 : 16|16@1+ (1,0) [0|0] "uS" Vector__XXX
+ SG_ PULSE_WIDTH_2 : 32|16@1+ (1,0) [0|0] "uS" Vector__XXX
+ SG_ ENABLE_CHANNEL_0 : 48|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ ENABLE_CHANNEL_1 : 49|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ ENABLE_CHANNEL_2 : 50|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ POWER_CHANNEL_0 : 51|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ POWER_CHANNEL_1 : 52|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ POWER_CHANNEL_2 : 53|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 54|2@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349137920 "Set the position of all servo channels";
+
+BO_ 2349137984 SET_SERVO_3_TO_5_PULSE_WIDTHS: 7 Vector__XXX
+ SG_ PULSE_WIDTH_3 : 0|16@1+ (1,0) [0|0] "uS" Vector__XXX
+ SG_ PULSE_WIDTH_4 : 16|16@1+ (1,0) [0|0] "uS" Vector__XXX
+ SG_ PULSE_WIDTH_5 : 32|16@1+ (1,0) [0|0] "uS" Vector__XXX
+ SG_ ENABLE_CHANNEL_3 : 48|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ ENABLE_CHANNEL_4 : 49|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ ENABLE_CHANNEL_5 : 50|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ POWER_CHANNEL_3 : 51|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ POWER_CHANNEL_4 : 52|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ POWER_CHANNEL_5 : 53|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 54|2@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349137984 "Set the position of all servo channels";
+
+BO_ 2349138048 SET_BANKS_PULSE_PERIOD: 3 Vector__XXX
+ SG_ CHANNEL_BANKS_BITFIELD : 0|2@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 2|6@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PULSE_PERIOD : 8|16@1+ (1,0) [0|0] "uS" Vector__XXX
+CM_ BO_ 2349138048 "Set the pulse period for a side of servo hub in microseconds. In response, a Set Banks Pulse Period Response frame will be sent.";
+CM_ SG_ 2349138048 CHANNEL_BANKS_BITFIELD "A bitfield where each bit represents one of the channel banks. Bit 0 represents the bank for channels 0-2, and bit 1 represents the bank for channels 3-5";
+
+BO_ 2349138176 RESET_CONFIGURATION: 2 Vector__XXX
+ SG_ MAGIC : 0|16@1+ (1,0) [48879|48879] "" Vector__XXX
+CM_ BO_ 2349138176 "Reset the configuration to the default value";
+
+BO_ 2349138240 SET_SERVO_MIN_PULSE_WIDTH: 3 Vector__XXX
+ SG_ CHANNEL : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PULSEUS : 8|16@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349138240 "Set the minimum pulse width for a channel in microseconds";
+
+BO_ 2349138304 SET_SERVO_CENTER_PULSE_WIDTH: 3 Vector__XXX
+ SG_ CHANNEL : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PULSEUS : 8|16@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349138304 "Set the center pulse width for a channel in microseconds";
+
+BO_ 2349138368 SET_SERVO_MAX_PULSE_WIDTH: 3 Vector__XXX
+ SG_ CHANNEL : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PULSEUS : 8|16@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349138368 "Set the maximum pulse width for a channel in microseconds";
+
+BO_ 2349138432 GET_PULSE_RANGE: 1 Vector__XXX
+ SG_ CHANNEL : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349138432 "Get the range of accepted pulse values";
+
+BO_ 2349138496 SET_DISABLE_BEHAVIOR: 2 Vector__XXX
+ SG_ MASK : 0|6@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BEHAVIOR_BITFIELD : 6|6@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 12|4@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349138496 "Set whether power should be maintained when a channel is disabled";
+
+BO_ 2349138560 GET_DISABLE_BEHAVIOR: 8 Vector__XXX
+ SG_ BEHAVIOR_BITFIELD : 0|6@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 6|58@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349138560 "Get whether power should be maintained when a channel is disabled";
+
+BO_ 2349144960 CLEAR_FAULTS: 0 Vector__XXX
+CM_ BO_ 2349144960 "In response, a Clear Faults Response frame is sent.";
+
+BO_ 2349147648 GET_VERSION: 8 Vector__XXX
+ SG_ FIRMWARE_FIX : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ FIRMWARE_MINOR : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ FIRMWARE_YEAR : 16|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ HARDWARE_MINOR : 24|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ HARDWARE_MAJOR : 32|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 40|24@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349147648 "The device version";
+
+BO_ 2349154880 GET_HARDWARE_FAULTS: 8 Vector__XXX
+ SG_ ADC_INIT : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CRC_INIT : 1|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ DAC_INIT : 2|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ FDCAN_INIT : 3|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ I2C_INIT : 4|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ SYSCLOCK_INIT : 5|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ SPI_INIT : 6|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ TIM_INIT : 7|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ USART_INIT : 8|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CSA1_INIT : 9|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CSA1_READ : 10|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CSA1_INVALID : 11|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CSA2_INIT : 12|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CSA2_READ : 13|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CSA2_INVALID : 14|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ FRC_CAN_INIT : 15|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CAN_TX : 16|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CAN_RX : 17|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CAN_SET_ID : 18|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ EEPROM_READ : 19|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ EEPROM_WRITE : 20|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 21|43@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349154880 "Get detailed hardware fault information";
+
+BO_ 2349158528 SET_BANKS_PULSE_PERIOD_RESPONSE: 4 Vector__XXX
+ SG_ CHANNEL_BANKS_BITFIELD : 0|2@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 2|6@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PULSE_PERIOD : 8|16@1+ (1,0) [0|0] "uS" Vector__XXX
+ SG_ RESULT : 24|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349158528 "Response to set frame period command";
+CM_ SG_ 2349158528 CHANNEL_BANKS_BITFIELD "A bitfield where each bit represents one of the channel banks. Bit 0 represents the bank for channels 0-2, and bit 1 represents the bank for channels 3-5";
+CM_ SG_ 2349158528 RESULT "0 indicates success";
+
+BO_ 2349158656 RESET_CONFIGURATION_RESPONSE: 2 Vector__XXX
+ SG_ MAGIC : 0|16@1+ (1,0) [48879|48879] "" Vector__XXX
+CM_ BO_ 2349158656 "Response for reset the configuration to the default value";
+
+BO_ 2349158720 SET_SERVO_MIN_PULSE_RESPONSE: 4 Vector__XXX
+ SG_ CHANNEL : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PULSEUS : 8|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESULT : 24|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349158720 "Response to set min pulse width command";
+
+BO_ 2349158784 SET_SERVO_CENTER_PULSE_RESPONSE: 4 Vector__XXX
+ SG_ CHANNEL : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PULSEUS : 8|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESULT : 24|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349158784 "Response to set servo center pulse width command";
+
+BO_ 2349158848 SET_SERVO_MAX_PULSE_RESPONSE: 4 Vector__XXX
+ SG_ CHANNEL : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PULSEUS : 8|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESULT : 24|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349158848 "Response to set max pulse width command";
+
+BO_ 2349158912 GET_PULSE_RANGE_RESPONSE: 6 Vector__XXX
+ SG_ MINPULSEUS : 0|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CENTERPULSEUS : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MAXPULSEUS : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349158912 "Get the range of accepted pulse values response";
+
+BO_ 2349158976 SET_DISABLE_BEHAVIOR_RESPONSE: 3 Vector__XXX
+ SG_ RESULT : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MASK : 8|6@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BEHAVIOR_BITFIELD : 14|6@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 20|4@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349158976 "Set whether power should be maintained when a channel is disabled";
+
+BO_ 2349165440 CLEAR_FAULTS_RESPONSE: 0 Vector__XXX
+CM_ BO_ 2349165440 "Response for a Clear Faults command.";
+
+BO_ 2349170560 SET_CAN_ID: 1 Vector__XXX
+ SG_ ID : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349170560 "Set the CAN ID";
+
+BO_ 2349185024 STATUS_0: 5 Vector__XXX
+ SG_ VOLTAGE : 0|10@1+ (0.025,0) [0|0] "V" Vector__XXX
+ SG_ SERVO_VOLTAGE : 10|10@1+ (0.025,0) [0|0] "V" Vector__XXX
+ SG_ DEVICE_CURRENT : 20|10@1+ (0.02,0) [0|0] "A" Vector__XXX
+ SG_ PRIMARY_HEARTBEAT_LOCK : 30|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ SYSTEM_ENABLED : 31|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ COMMUNICATION_MODE : 32|3@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 35|5@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349185024 "Status frame that holds general important information";
+CM_ SG_ 2349185024 COMMUNICATION_MODE "0: None, 1: CAN, 2: RS-485";
+
+BO_ 2349185088 STATUS_1: 8 Vector__XXX
+ SG_ REGULATOR_PGOOD_FAULT : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BROWNOUT : 1|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CAN_WARNING : 2|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CAN_BUS_OFF : 3|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ HARDWARE_FAULT : 4|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ FIRMWARE_FAULT : 5|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ HAS_RESET : 6|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CHANNEL_0_OVERCURRENT : 7|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CHANNEL_1_OVERCURRENT : 8|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CHANNEL_2_OVERCURRENT : 9|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CHANNEL_3_OVERCURRENT : 10|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CHANNEL_4_OVERCURRENT : 11|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CHANNEL_5_OVERCURRENT : 12|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ LOW_BATTERY_FAULT : 13|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 14|18@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_REGULATOR_PGOOD_FAULT : 32|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_BROWNOUT : 33|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_CAN_WARNING : 34|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_CAN_BUS_OFF : 35|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_HARDWARE_FAULT : 36|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_FIRMWARE_FAULT : 37|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_HAS_RESET : 38|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_CHANNEL_0_OVERCURRENT : 39|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_CHANNEL_1_OVERCURRENT : 40|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_CHANNEL_2_OVERCURRENT : 41|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_CHANNEL_3_OVERCURRENT : 42|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_CHANNEL_4_OVERCURRENT : 43|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_CHANNEL_5_OVERCURRENT : 44|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_LOW_BATTERY_FAULT : 45|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED_2 : 46|18@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349185088 "Faults";
+
+BO_ 2349185152 STATUS_2: 7 Vector__XXX
+ SG_ CHANNEL_0_PULSE_WIDTH : 0|16@1+ (1,0) [0|0] "uS" Vector__XXX
+ SG_ CHANNEL_1_PULSE_WIDTH : 16|16@1+ (1,0) [0|0] "uS" Vector__XXX
+ SG_ CHANNEL_2_PULSE_WIDTH : 32|16@1+ (1,0) [0|0] "uS" Vector__XXX
+ SG_ CHANNEL_0_ENABLED : 48|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CHANNEL_1_ENABLED : 49|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CHANNEL_2_ENABLED : 50|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CHANNEL_0_OUT_OF_RANGE : 51|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CHANNEL_1_OUT_OF_RANGE : 52|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CHANNEL_2_OUT_OF_RANGE : 53|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 54|2@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349185152 "Channel 0-2 state";
+
+BO_ 2349185216 STATUS_3: 7 Vector__XXX
+ SG_ CHANNEL_3_PULSE_WIDTH : 0|16@1+ (1,0) [0|0] "uS" Vector__XXX
+ SG_ CHANNEL_4_PULSE_WIDTH : 16|16@1+ (1,0) [0|0] "uS" Vector__XXX
+ SG_ CHANNEL_5_PULSE_WIDTH : 32|16@1+ (1,0) [0|0] "uS" Vector__XXX
+ SG_ CHANNEL_3_ENABLED : 48|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CHANNEL_4_ENABLED : 49|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CHANNEL_5_ENABLED : 50|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CHANNEL_3_OUT_OF_RANGE : 51|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CHANNEL_4_OUT_OF_RANGE : 52|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CHANNEL_5_OUT_OF_RANGE : 53|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 54|2@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349185216 "Channel 3-5 state";
+
+BO_ 2349185280 STATUS_4: 8 Vector__XXX
+ SG_ CHANNEL_0_CURRENT : 0|10@1+ (0.01,0) [0|0] "A" Vector__XXX
+ SG_ CHANNEL_1_CURRENT : 10|10@1+ (0.01,0) [0|0] "A" Vector__XXX
+ SG_ CHANNEL_2_CURRENT : 20|10@1+ (0.01,0) [0|0] "A" Vector__XXX
+ SG_ CHANNEL_3_CURRENT : 30|10@1+ (0.01,0) [0|0] "A" Vector__XXX
+ SG_ CHANNEL_4_CURRENT : 40|10@1+ (0.01,0) [0|0] "A" Vector__XXX
+ SG_ CHANNEL_5_CURRENT : 50|10@1+ (0.01,0) [0|0] "A" Vector__XXX
+ SG_ RESERVED : 60|4@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2349185280 "Channel currents";

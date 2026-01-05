@@ -1,0 +1,49 @@
+{
+  "name": "revlog-converter",
+  "version": "2026.1.0",
+  "description": "Parse and convert REVLOG files to WPILOG format.",
+  "keywords": [
+    "REV",
+    "revlog",
+    "wpilog",
+    "FRC"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": "./dist/cli.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:esm": "tsc -p tsconfig.json",
+    "build:cli": "esbuild src/cli.ts --bundle --platform=node --format=esm --outfile=dist/cli.js --packages=external",
+    "build": "shx rm -rf ./dist && npm run build:esm && npm run build:cli",
+    "postbuild": "shx cp -r src/resources dist/resources && shx cp README.md dist/ && shx cp LICENSE dist/",
+    "lint:fix": "eslint 'src/**/*.ts' --fix",
+    "lint:check": "eslint 'src/**/*.ts'",
+    "format": "prettier --write 'src/**/*.ts'",
+    "format:check": "prettier --check 'src/**/*.ts'",
+    "dev": "tsx src/cli.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.25",
+    "@typescript-eslint/eslint-plugin": "^7.1.1",
+    "@typescript-eslint/parser": "^7.1.1",
+    "esbuild": "^0.27.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "prettier": "^3.2.5",
+    "shx": "^0.3.4",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

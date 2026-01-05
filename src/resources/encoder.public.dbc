@@ -1,0 +1,393 @@
+
+VERSION ""
+
+
+NS_ :
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER_
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_:
+
+BO_ 2265257984 UNIQUE_ID_RESP: 4 Vector__XXX
+ SG_ ID : 0|32@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265257984 "Response to 'Get Unique IDs'. Device must offset their responses in relation to other devices of the same type since any devices with the same CAN ID will collide during transmission";
+
+BO_ 2265259008 GET_UNIQUE_IDS: 0 Vector__XXX
+CM_ BO_ 2265259008 "Makes all devices on the bus of the same device type broadcast their unique ID";
+
+BO_ 2265264128 RESTORE_DEFAULTS: 4 Vector__XXX
+ SG_ KEY : 0|32@1+ (1,0) [1242673973|1242673973] "" Vector__XXX
+CM_ BO_ 2265264128 "Restores all parameter values to defaults.";
+CM_ SG_ 2265264128 KEY "Key for preventing accidental use of this command: 0x4A11B335";
+
+BO_ 2265264192 RESTORE_DEFAULTS_RESP: 1 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265264192 "Response to 'Restore Defaults'. Returns non-zero value if an error has occurred";
+
+BO_ 2265264256 GET_PRODUCT_ID: 0 Vector__XXX
+CM_ BO_ 2265264256 "Requests the Product ID of the device.";
+
+BO_ 2265264320 GET_PRODUCT_ID_RESP: 2 Vector__XXX
+ SG_ ID : 0|16@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265264320 "Response 'Get Product ID'. Return non-zero if an error has occurred";
+
+BO_ 2265266176 GET_VERSIONING: 0 Vector__XXX
+CM_ BO_ 2265266176 "Requests HW and SW versioning information from the device.";
+
+BO_ 2265266240 GET_VERSIONING_RESP: 6 Vector__XXX
+ SG_ HW_MINOR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ HW_MAJOR : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ SW_PRERELEASE : 16|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ SW_FIX : 24|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ SW_MINOR : 32|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ SW_MAJOR : 40|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265266240 "Response to 'Get Versioning'. Will return HW version and SW version data";
+
+BO_ 2265266304 GET_PERIODIC_FRAME_PERIOD: 1 Vector__XXX
+ SG_ FRAME_IDX : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265266304 "Sets the period of time that a periodic frame will be sent.";
+
+BO_ 2265266368 GET_PERIODIC_FRAME_PERIOD_RESP: 4 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ FRAME_IDX : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PERIOD : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265266368 "Response to 'Get Periodic Frame Period'. Returns index and period of requested periodic frame.";
+CM_ SG_ 2265266368 ERROR "Non-zero value indicates error and invalidates data.";
+
+BO_ 2265266432 GET_NAME: 0 Vector__XXX
+CM_ BO_ 2265266432 "Requests custom device name";
+
+BO_ 2265266496 GET_NAME_RESP: 7 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ INDEX : 8|8@1+ (1,0) [0|16] "" Vector__XXX
+ SG_ C3 : 16|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ C2 : 24|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ C1 : 32|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ C0 : 40|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ ISEND : 48|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265266496 "Returns partial sets of characters of the custom device name";
+CM_ SG_ 2265266496 ERROR "Non-zero value indicates error and invalidates data.";
+CM_ SG_ 2265266496 INDEX "Index for set of 4 characters. Must be less than 16";
+CM_ SG_ 2265266496 ISEND "Non-Zero value indicates that this is the end of the name for the device to terminate the string.";
+
+BO_ 2265266560 GET_POSITION_CONV_FACTOR: 0 Vector__XXX
+CM_ BO_ 2265266560 "Requests the position conversion factor of the encoder";
+
+BO_ 2265266624 GET_POSITION_CONV_FACTOR_RESP: 5 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ FACTOR : 8|32@1- (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265266624 "Response to 'Get Position Conv Factor'. Returns position conversion factor";
+SIG_VALTYPE_ 2265266624 FACTOR : 1;
+
+BO_ 2265266688 GET_VELOCITY_CONV_FACTOR: 0 Vector__XXX
+CM_ BO_ 2265266688 "Requests the velocity conversion factor of the encoder";
+
+BO_ 2265266752 GET_VELOCITY_CONV_FACTOR_RESP: 5 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ FACTOR : 8|32@1- (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265266752 "Response to 'Get Velocity Conv Factor'. Returns velocity conversion factor value";
+SIG_VALTYPE_ 2265266752 FACTOR : 1;
+
+BO_ 2265266816 GET_ANGLE_OFFSET: 0 Vector__XXX
+CM_ BO_ 2265266816 "Requests the angle offset of the encoder.";
+
+BO_ 2265266880 GET_ANGLE_OFFSET_RESP: 5 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ OFFSET : 8|32@1- (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265266880 "Response to 'Get Angle Offset'. Returns angle offset value";
+SIG_VALTYPE_ 2265266880 OFFSET : 1;
+
+BO_ 2265267072 GET_VELOCITY_AVG_SAMPLES: 0 Vector__XXX
+CM_ BO_ 2265267072 "Requests the number of samples for averaging the velocity of the encoder";
+
+BO_ 2265267136 GET_VELOCITY_AVG_SAMPLES_RESP: 3 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ SAMPLES : 8|16@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265267136 "Response to 'Get Velocity Avg Samples'. Returns number of samples to average velocity";
+
+BO_ 2265268224 SET_CAN_ID: 5 Vector__XXX
+ SG_ UNIQUE_ID : 0|32@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CAN_ID : 32|8@1+ (1,0) [0|63] "" Vector__XXX
+CM_ BO_ 2265268224 "Changes CAN ID value. Will change all devices' IDs of the same device type with the same CAN ID unless a non-zero unique ID is provided.";
+
+BO_ 2265268288 SET_CAN_ID_RESP: 1 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265268288 "Response to 'Set CAN ID'. Returning whether the request succeeded";
+
+BO_ 2265268352 SET_PERIODIC_FRAME_PERIOD: 3 Vector__XXX
+ SG_ FRAME_IDX : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PERIOD : 8|16@1+ (1,0) [0|1000] "ms" Vector__XXX
+CM_ BO_ 2265268352 "Sets the period of time that a periodic frame will be sent.";
+CM_ SG_ 2265268352 FRAME_IDX "Number of the periodic frame";
+CM_ SG_ 2265268352 PERIOD "Period of the periodic frame being sent. Any period value below 10ms will disable the frame";
+
+BO_ 2265268416 SET_PERIODIC_FRAME_PERIOD_RESP: 2 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ FRAME : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265268416 "Response to 'Set Periodic Frame Period' command. Responds";
+
+BO_ 2265268480 SET_NAME: 6 Vector__XXX
+ SG_ INDEX : 0|8@1+ (1,0) [0|16] "" Vector__XXX
+ SG_ C3 : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ C2 : 16|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ C1 : 24|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ C0 : 32|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ ISEND : 40|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265268480 "Sets custom name of the device for personalization.";
+CM_ SG_ 2265268480 INDEX "Index for set of 4 characters. Must be less than 16";
+CM_ SG_ 2265268480 ISEND "Non-Zero value indicates that this is the end of the name for the device to terminate the string.";
+
+BO_ 2265268544 SET_NAME_RESP: 2 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ INDEX : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265268544 "Response to 'Set Name' command. Will return status of writing the set of characters sent.";
+CM_ SG_ 2265268544 ERROR "Non-zero indicates error with last 'Set Name' command";
+CM_ SG_ 2265268544 INDEX "Index provided by last 'Set Name' command";
+
+BO_ 2265268608 SET_POSITION_CONV_FACTOR: 4 Vector__XXX
+ SG_ FACTOR : 0|32@1- (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265268608 "Updates the position conversion factor of the encoder";
+SIG_VALTYPE_ 2265268608 FACTOR : 1;
+
+BO_ 2265268672 SET_POSITION_CONV_FACTOR_RESP: 1 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265268672 "Response to 'Set Position Conv Factor'. Returns non-zero value on error of the last request";
+
+BO_ 2265268736 SET_VELOCITY_CONV_FACTOR: 4 Vector__XXX
+ SG_ FACTOR : 0|32@1- (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265268736 "Updates the velocity conversion factor of the encoder";
+SIG_VALTYPE_ 2265268736 FACTOR : 1;
+
+BO_ 2265268800 SET_VELOCITY_CONV_FACTOR_RESP: 1 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265268800 "Response to 'Set Velocity Conv Factor'. Returns non-zero value on error of the last request";
+
+BO_ 2265268864 SET_ANGLE_OFFSET: 4 Vector__XXX
+ SG_ OFFSET : 0|32@1- (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265268864 "Updates the angle offset of the encoder";
+SIG_VALTYPE_ 2265268864 OFFSET : 1;
+
+BO_ 2265268928 SET_ANGLE_OFFSET_RESP: 1 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265268928 "Response to 'Set Angle Offset'. Returns non-zero value on error of the last request";
+
+BO_ 2265269120 SET_VELOCITY_AVG_SAMPLES: 1 Vector__XXX
+ SG_ SAMPLES : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265269120 "Sets the number of samples for averaging the velocity.";
+
+BO_ 2265269184 SET_VELOCITY_AVG_SAMPLES_RESP: 1 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265269184 "Response to 'Set Velocity Avg Samples'. Returns non-zero value on error of the last request";
+
+BO_ 2265270272 GET_INVERSION: 0 Vector__XXX
+CM_ BO_ 2265270272 "Requests the inversion mode of the encoder";
+
+BO_ 2265270336 GET_INVERSION_RESP: 2 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ INVERTED : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265270336 "Response to 'Get Inversion'. Returns inversion value";
+
+BO_ 2265270400 GET_ZERO_CENTERED: 0 Vector__XXX
+CM_ BO_ 2265270400 "Requests the current setting of zero centered mode for absolute positioning.";
+
+BO_ 2265270464 GET_ZERO_CENTERED_RESP: 2 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CENTERED : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265270464 "Response to 'Get Zero Centered'. Returns zero-centered value";
+
+BO_ 2265270528 GET_ABS_AVG_DEPTH: 0 Vector__XXX
+CM_ BO_ 2265270528 "Requests the averaging depth for absolute positioning.";
+
+BO_ 2265270592 GET_ABS_AVG_DEPTH_RESP: 2 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ DEPTH : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265270592 "Response to 'Get Abs Avg Depth'. Returns absolute avg depth value";
+
+BO_ 2265270656 GET_ANGLE_CONV_FACTOR: 0 Vector__XXX
+CM_ BO_ 2265270656 "Requests the Angle Conversion Factor.";
+
+BO_ 2265270720 GET_ANGLE_CONV_FACTOR_RESP: 5 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ FACTOR : 8|32@1- (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265270720 "Response to 'Get Angle Conv Factor'. Returns Angle Conversion Factor";
+SIG_VALTYPE_ 2265270720 FACTOR : 1;
+
+BO_ 2265270784 GET_ABS_MIN_HIGH_TIME: 0 Vector__XXX
+CM_ BO_ 2265270784 "Adapter Exclusive - Requests the minimum time the device expects the signal will be high.";
+
+BO_ 2265270848 GET_ABS_MIN_HIGH_TIME_RESP: 5 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ TIME : 8|32@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265270848 "Adapter Exclusive - Response to 'Get Abs Min High Time'. Returns Min Abs High Time value";
+
+BO_ 2265270912 GET_ABS_MIN_LOW_TIME: 0 Vector__XXX
+CM_ BO_ 2265270912 "Adapter Exclusive - Requests the minimum time the device expects the signal will be low.";
+
+BO_ 2265270976 GET_ABS_MIN_LOW_TIME_RESP: 5 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ TIME : 8|32@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265270976 "Adapter Exclusive - Response to 'Get Abs Min Low Time'. Returns Min Abs Low Time value";
+
+BO_ 2265271040 GET_ABS_PERIOD: 0 Vector__XXX
+CM_ BO_ 2265271040 "Adapter Exclusive - Requests expected absolute position signal period.";
+
+BO_ 2265271104 GET_ABS_PERIOD_RESP: 5 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PERIOD : 8|32@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265271104 "Adapter Exclusive - Response to 'Get Abs Period'. Returns expected absolute position signal period.";
+
+BO_ 2265271168 GET_CPR: 0 Vector__XXX
+CM_ BO_ 2265271168 "Adapter Exclusive - Requests expected counts per revolution of the sensor.";
+
+BO_ 2265271232 GET_CPR_RESP: 5 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CPR : 8|32@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265271232 "Adapter Exclusive - Response to 'Get CPR'. Returns expected counts per revolution.";
+
+BO_ 2265272320 SET_INVERSION: 1 Vector__XXX
+ SG_ INVERTED : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265272320 "Sets the inversion mode of the encoder.";
+
+BO_ 2265272384 SET_INVERSION_RESP: 1 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265272384 "Response to 'Set Inversion'. Returns non-zero value on error for the last request";
+
+BO_ 2265272448 SET_ZERO_CENTERED: 1 Vector__XXX
+ SG_ CENTERED : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265272448 "Requests the current setting of zero centered mode for absolute positioning.";
+
+BO_ 2265272512 SET_ZERO_CENTERED_RESP: 1 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265272512 "Response to 'Get Zero Centered'. Returns non-zero value on error";
+
+BO_ 2265272576 SET_ABS_AVG_DEPTH: 1 Vector__XXX
+ SG_ DEPTH : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265272576 "Sets the averaging depth for absolute positioning.";
+
+BO_ 2265272640 SET_ABS_AVG_DEPTH_RESP: 1 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265272640 "Response to 'Set Abs Avg Depth'. Returns non-zero value on error";
+
+BO_ 2265272704 SET_ANGLE_CONV_FACTOR: 4 Vector__XXX
+ SG_ FACTOR : 0|32@1- (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265272704 "Sets the conversion factor for the angle.";
+SIG_VALTYPE_ 2265272704 FACTOR : 1;
+
+BO_ 2265272768 SET_ANGLE_CONV_FACTOR_RESP: 1 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265272768 "Response to 'Set Angle Conv Factor'. Returns non-zero value on error";
+
+BO_ 2265272832 SET_ABS_MIN_HIGH_TIME: 4 Vector__XXX
+ SG_ TIME : 0|32@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265272832 "Adapter Exclusive - Sets the expected minimum high time of the absolute signal.";
+
+BO_ 2265272896 SET_ABS_MIN_HIGH_TIME_RESP: 1 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265272896 "Adapter Exclusive - Response to 'Set Abs High Time'. Returns non-zero value on error";
+
+BO_ 2265272960 SET_ABS_MIN_LOW_TIME: 4 Vector__XXX
+ SG_ TIME : 0|32@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265272960 "Adapter Exclusive - Sets the expected minimum low time of the absolute signal.";
+
+BO_ 2265273024 SET_ABS_MIN_LOW_TIME_RESP: 1 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265273024 "Adapter Exclusive - Response to 'Set Abs Min Low Time'. Returns non-zero value on error";
+
+BO_ 2265273088 SET_ABS_PERIOD: 4 Vector__XXX
+ SG_ PERIOD : 0|32@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265273088 "Adapter Exclusive - Sets the expected period for the input absolute signal.";
+
+BO_ 2265273152 SET_ABS_PERIOD_RESP: 1 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265273152 "Adapter Exclusive - Response to 'Set Abs Period'. Returns non-zero value on error";
+
+BO_ 2265273216 SET_CPR: 4 Vector__XXX
+ SG_ CPR : 0|32@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265273216 "Adapter Exclusive - Sets the expected counts per revolution of the sensor.";
+
+BO_ 2265273280 SET_CPR_RESP: 1 Vector__XXX
+ SG_ ERROR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265273280 "Adapter Exclusive - Response to 'Set CPR'. Returns non-zero value on error";
+
+BO_ 2265282560 IDENTIFY: 0 Vector__XXX
+CM_ BO_ 2265282560 "Makes the smart sensor temporarily perform a special blink pattern that will make it stand out";
+
+BO_ 2265282624 SET_ENCODER_POSITION: 4 Vector__XXX
+ SG_ POSITION : 0|32@1- (1,0) [0|0] "" Vector__XXX
+CM_ SG_ 2265282624 POSITION "By default, the unit is rotations, but it can be changed implicitly using the Position Conversion Factor parameter";
+SIG_VALTYPE_ 2265282624 POSITION : 1;
+
+BO_ 2265282688 CLEAR_FAULTS: 0 Vector__XXX
+
+BO_ 2265296896 BOOTLOADER_0: 8 Vector__XXX
+ SG_ BL_MAJOR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BL_MINOR : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PRODUCT_ID : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RSVD : 32|32@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265296896 "Periodic frame when device is in the bootloader";
+
+BO_ 2265298944 PERIODIC_FRAME_0: 1 Vector__XXX
+ SG_ DEVICE_MODEL : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265298944 "Identification frame for REV Client(s) device info. Not able to be disabled";
+
+BO_ 2265299008 PERIODIC_FRAME_1: 2 Vector__XXX
+ SG_ UNEXPECTED : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ HAS_RESET : 1|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CAN_TX : 2|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CAN_RX : 3|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ EEPROM : 4|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RSVD1 : 5|3@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_UNEXPECTED : 8|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_HAS_RESET : 9|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_CAN_TX : 10|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_CAN_RX : 11|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_EEPROM : 12|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STICKY_RSVD1 : 13|3@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2265299008 "Status flags that will contain event flags and errors";
+
+BO_ 2265299072 PERIODIC_FRAME_2: 8 Vector__XXX
+ SG_ RAWANGLE : 0|32@1- (1,0) [0|0] "Rotations" Vector__XXX
+ SG_ ANGLE : 32|32@1- (1,0) [0|0] "Rotations" Vector__XXX
+CM_ BO_ 2265299072 "Timestamp and Angle";
+SIG_VALTYPE_ 2265299072 RAWANGLE : 1;
+SIG_VALTYPE_ 2265299072 ANGLE : 1;
+
+BO_ 2265299136 PERIODIC_FRAME_3: 8 Vector__XXX
+ SG_ TIMESTAMP : 0|32@1+ (1,0) [0|0] "ms" Vector__XXX
+ SG_ POSITION : 32|32@1- (1,0) [0|0] "Rotations" Vector__XXX
+CM_ BO_ 2265299136 "Timestamp and Position";
+SIG_VALTYPE_ 2265299136 POSITION : 1;
+
+BO_ 2265299200 PERIODIC_FRAME_4: 8 Vector__XXX
+ SG_ TIMESTAMP : 0|32@1+ (1,0) [0|0] "ms" Vector__XXX
+ SG_ VELOCITY : 32|32@1- (1,0) [0|0] "RPM" Vector__XXX
+CM_ BO_ 2265299200 "Timestamp and Velocity";
+SIG_VALTYPE_ 2265299200 VELOCITY : 1;

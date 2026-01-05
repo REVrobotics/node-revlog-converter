@@ -1,0 +1,10 @@
+#!/bin/sh
+
+echo "Running format check..."
+npm run format:check
+
+echo "Running linter"
+npm run lint:check
+
+echo "Building..."
+npm run build
