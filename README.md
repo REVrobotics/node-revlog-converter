@@ -14,7 +14,7 @@ You can use `revlog-converter` as a standalone command-line tool to convert log 
 
 To use the CLI globally:
 
-`npm install -g revlog-converter`
+`npm install -g @rev-robotics/revlog-converter`
 
 #### Basic Usage
 
@@ -41,14 +41,14 @@ You can import `revlog-converter` into your own TypeScript or JavaScript project
 
 #### Installation
 
-`npm install revlog-converter`
+`npm install @rev-robotics/revlog-converter`
 
 #### 1\. File-to-File Conversion
 
 Pass file paths directly to the parser. The function handles reading and writing for you.
 
 ```typescript
-import { parseREVLOG } from 'revlog-converter';
+import { parseREVLOG } from '@rev-robotics/revlog-converter';
 
 async function convertFile() {
   try {
@@ -66,7 +66,7 @@ async function convertFile() {
 For advanced use cases (e.g., web servers, processing streams), you can pass a `Buffer` containing the REVLOG data. The function returns a `Promise<Buffer>` containing the generated WPILOG data.
 
 ```typescript
-import { parseREVLOG } from 'revlog-converter';
+import { parseREVLOG } from '@rev-robotics/revlog-converter';
 import { promises as fs } from 'fs';
 
 async function processInMemory() {
