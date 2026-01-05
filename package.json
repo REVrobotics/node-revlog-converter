@@ -1,7 +1,13 @@
 {
-  "name": "revlog-converter",
-  "version": "2026.1.0",
-  "description": "Parse and convert REVLOG files to WPILOG format.",
+  "name": "@rev-robotics/revlog-converter",
+  "version": "1.0.1",
+  "author": "REV Robotics",
+  "license": "BSD-3-Clause",
+  "description": "Tool to parse and convert .revlog files produced by REVLib's StatusLogger to .wpilog files",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/REVrobotics/node-revlog-converter.git"
+  },
   "keywords": [
     "REV",
     "revlog",
