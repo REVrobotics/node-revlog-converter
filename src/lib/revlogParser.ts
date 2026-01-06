@@ -330,110 +330,151 @@ export async function parseREVLOG(
   );
 
   let cursor = 0;
-  while (cursor < binary_data.length) {
-    if (cursor + 1 > binary_data.length) break;
-    const bitfield = binary_data[cursor];
-    cursor++;
 
-    const entryIdLen = (bitfield & 0b11) + 1;
-    const sizeLen = ((bitfield >> 2) & 0b11) + 1;
+  await new Promise<void>((resolve, reject) => {
+    const parseChunk = () => {
+      const startTick = Date.now();
 
-    let entryId, payloadSize;
-    [entryId, cursor] = readVariableInt(binary_data, cursor, entryIdLen);
-    [payloadSize, cursor] = readVariableInt(binary_data, cursor, sizeLen);
-
-    if (cursor + payloadSize > binary_data.length) break;
-    const payloadBytes = binary_data.slice(cursor, cursor + payloadSize);
-    cursor += payloadSize;
-
-    if (entryId === 1) {
-      // Firmware
-      recordsProcessed = true;
-      for (let pc = 0; pc + 10 <= payloadBytes.length; pc += 10) {
-        const messageId = payloadBytes.readUInt32LE(pc);
-        const canData = payloadBytes.slice(pc + 4, pc + 10);
-        const deviceType = (messageId >> 24) & 0x1f;
-        const device = devices.get(deviceType);
-
-        if (device && device.firmwareFrameId) {
-          const padded = Buffer.concat([canData, Buffer.alloc(8)]);
-          const decoded = device.canDecoder.decode(
-            device.canDecoder.createFrame(device.firmwareFrameId, padded)
-          );
-          if (decoded) {
-            const name = `${device.prefix}${messageId & 0x3f}/FIRMWARE`;
-            if (!RECORDS.has(name)) {
-              writeControlRecord(NEXT_RECORD_ID++, name, 'string', '');
-            }
-            writeRecord(
-              name,
-              device.parseFirmwareVersion(decoded.boundSignals, canData),
-              0
-            );
+      try {
+        while (cursor < binary_data.length) {
+          // Check if we have exceeded our time slice
+          if (Date.now() - startTick > 15) {
+            setImmediate(parseChunk); // Yield to Event Loop
+            return; // Exit current stack frame
           }
-        }
-      }
-    } else if (entryId === 2) {
-      // Periodic
-      recordsProcessed = true;
-      for (let pc = 0; pc + 16 <= payloadBytes.length; pc += 16) {
-        const msgTsMs = payloadBytes.readUInt32LE(pc);
-        const messageId = payloadBytes.readUInt32LE(pc + 4);
-        const canData = payloadBytes.slice(pc + 8, pc + 16);
-        const deviceType = (messageId >> 24) & 0x1f;
-        const device = devices.get(deviceType);
 
-        if (device) {
-          const frameIndex = (messageId >> 6) & 0xf;
-          const messageSpec = device.periodicFrames.get(frameIndex);
+          if (cursor + 1 > binary_data.length) break;
+          const bitfield = binary_data[cursor];
+          cursor++;
 
-          if (messageSpec) {
-            let alignedData = canData;
-            if (canData.length < messageSpec.dlc) {
-              alignedData = Buffer.concat([
-                canData,
-                Buffer.alloc(messageSpec.dlc - canData.length),
-              ]);
-            }
+          const entryIdLen = (bitfield & 0b11) + 1;
+          const sizeLen = ((bitfield >> 2) & 0b11) + 1;
 
-            try {
-              const decoded = device.canDecoder.decode(
-                device.canDecoder.createFrame(messageSpec.id, alignedData)
-              );
-              if (decoded) {
-                for (const [signalName, boundSignal] of decoded.boundSignals) {
-                  const signalSpec = messageSpec.signals.get(signalName);
-                  if (!signalSpec) continue;
+          let entryId, payloadSize;
+          try {
+            [entryId, cursor] = readVariableInt(
+              binary_data,
+              cursor,
+              entryIdLen
+            );
+            [payloadSize, cursor] = readVariableInt(
+              binary_data,
+              cursor,
+              sizeLen
+            );
+          } catch (e) {
+            break;
+          } // Handle truncation
 
-                  const folder = signalName.endsWith('FAULT')
-                    ? '/FAULT/'
-                    : signalName.endsWith('WARNING')
-                      ? '/WARNING/'
-                      : '/';
-                  const name = `${device.prefix}${messageId & 0x3f}${folder}${signalName}`;
+          if (cursor + payloadSize > binary_data.length) break;
+          const payloadBytes = binary_data.slice(cursor, cursor + payloadSize);
+          cursor += payloadSize;
 
+          if (entryId === 1) {
+            // Firmware
+            recordsProcessed = true;
+            for (let pc = 0; pc + 10 <= payloadBytes.length; pc += 10) {
+              const messageId = payloadBytes.readUInt32LE(pc);
+              const canData = payloadBytes.slice(pc + 4, pc + 10);
+              const deviceType = (messageId >> 24) & 0x1f;
+              const device = devices.get(deviceType);
+
+              if (device && device.firmwareFrameId) {
+                // Pad to 8 bytes for safe decoding
+                const padded = Buffer.concat([canData, Buffer.alloc(8)]);
+                const decoded = device.canDecoder.decode(
+                  device.canDecoder.createFrame(device.firmwareFrameId, padded)
+                );
+                if (decoded) {
+                  const name = `${device.prefix}${messageId & 0x3f}/FIRMWARE`;
                   if (!RECORDS.has(name)) {
-                    const wpilogType = getWpilogTypeFromSignal(signalSpec);
-                    const metadata =
-                      signalSpec.description ?? signalSpec.unit ?? '';
-                    writeControlRecord(
-                      NEXT_RECORD_ID++,
-                      name,
-                      wpilogType,
-                      metadata
-                    );
+                    writeControlRecord(NEXT_RECORD_ID++, name, 'string', '');
                   }
-                  writeRecord(name, boundSignal.value, msgTsMs);
+                  // FIX: Write record every time (outside the if block)
+                  writeRecord(
+                    name,
+                    device.parseFirmwareVersion(decoded.boundSignals, canData),
+                    0
+                  );
                 }
               }
-            } catch (e) {
-              /* ignore decode errors */
+            }
+          } else if (entryId === 2) {
+            // Periodic
+            recordsProcessed = true;
+            for (let pc = 0; pc + 16 <= payloadBytes.length; pc += 16) {
+              const msgTsMs = payloadBytes.readUInt32LE(pc);
+              const messageId = payloadBytes.readUInt32LE(pc + 4);
+              const canData = payloadBytes.slice(pc + 8, pc + 16);
+              const deviceType = (messageId >> 24) & 0x1f;
+              const device = devices.get(deviceType);
+
+              if (device) {
+                const frameIndex = (messageId >> 6) & 0xf;
+                const messageSpec = device.periodicFrames.get(frameIndex);
+
+                if (messageSpec) {
+                  let alignedData = canData;
+                  if (canData.length < messageSpec.dlc) {
+                    alignedData = Buffer.concat([
+                      canData,
+                      Buffer.alloc(messageSpec.dlc - canData.length),
+                    ]);
+                  }
+
+                  try {
+                    const decoded = device.canDecoder.decode(
+                      device.canDecoder.createFrame(messageSpec.id, alignedData)
+                    );
+                    if (decoded) {
+                      for (const [
+                        signalName,
+                        boundSignal,
+                      ] of decoded.boundSignals) {
+                        const signalSpec = messageSpec.signals.get(signalName);
+                        if (!signalSpec) continue;
+
+                        const folder = signalName.endsWith('FAULT')
+                          ? '/FAULT/'
+                          : signalName.endsWith('WARNING')
+                            ? '/WARNING/'
+                            : '/';
+                        const name = `${device.prefix}${messageId & 0x3f}${folder}${signalName}`;
+
+                        if (!RECORDS.has(name)) {
+                          const wpilogType =
+                            getWpilogTypeFromSignal(signalSpec);
+                          const metadata =
+                            signalSpec.description ?? signalSpec.unit ?? '';
+                          writeControlRecord(
+                            NEXT_RECORD_ID++,
+                            name,
+                            wpilogType,
+                            metadata
+                          );
+                        }
+                        writeRecord(name, boundSignal.value, msgTsMs);
+                      }
+                    }
+                  } catch (e) {
+                    /* ignore decode errors */
+                  }
+                }
+              }
             }
           }
         }
+
+        // Loop finished naturally
+        resolve();
+      } catch (e) {
+        reject(e);
       }
-    }
-  }
+    };
+
+    // Start parsing loop
+    parseChunk();
+  });
 
   if (!recordsProcessed) throw new Error('No valid records found.');
   const finalBuffer = Buffer.concat(outputChunks);
