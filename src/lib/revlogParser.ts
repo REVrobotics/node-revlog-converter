@@ -7,11 +7,10 @@ import { Dbc, CanDecoder, BoundSignal, Message, Signal } from './revDBC.js';
 export async function parseREVLOG(
   input: string | Buffer | Readable,
   outputTarget?: string | Writable
-): Promise<Buffer | void> {
+): Promise<void> {
   // --- Stream Setup ---
   let readStream: Readable;
   let writeStream: Writable | null = null;
-  const outputChunks: Buffer[] = [];
 
   // Handle Input
   if (input instanceof Readable) {
@@ -36,8 +35,6 @@ export async function parseREVLOG(
   const writeOut = (data: Buffer) => {
     if (writeStream) {
       writeStream.write(data);
-    } else {
-      outputChunks.push(data);
     }
   };
   // --- Constants ---
@@ -474,7 +471,4 @@ export async function parseREVLOG(
     });
     return; // Returns void if writing to a file
   }
-
-  // Fallback for smaller buffers where no outputFilename was provided
-  return Buffer.concat(outputChunks);
 }
