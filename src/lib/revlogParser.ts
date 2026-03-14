@@ -464,11 +464,14 @@ export async function parseREVLOG(
 
   // --- Cleanup ---
   if (writeStream) {
-    writeStream.end();
-    await new Promise<void>((resolve, reject) => {
-      writeStream!.on('finish', resolve);
-      writeStream!.on('error', reject);
-    });
-    return; // Returns void if writing to a file
+    // Only close and wait if it's NOT standard output
+    if (writeStream !== process.stdout) {
+      writeStream.end();
+      await new Promise<void>((resolve, reject) => {
+        writeStream!.on('finish', resolve);
+        writeStream!.on('error', reject);
+      });
+    }
+    return;
   }
 }
