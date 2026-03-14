@@ -346,6 +346,13 @@ export async function parseREVLOG(
           tempCursor,
           sizeLen
         );
+
+        if (payloadSize > 5 * 1024 * 1024) {
+          // 5MB sanity limit
+          throw new Error(
+            `Corrupted file: unrealistic payload size of ${payloadSize} bytes.`
+          );
+        }
       } catch (e) {
         break; // Awaiting more data
       }
