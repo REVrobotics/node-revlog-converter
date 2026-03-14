@@ -458,6 +458,11 @@ export async function parseREVLOG(
     if (cursor > 0) {
       accumulator = accumulator.subarray(cursor);
     }
+
+    // 6. Check for backpressure
+    if (writeStream && writeStream.writableNeedDrain) {
+      await new Promise((resolve) => writeStream!.once('drain', resolve));
+    }
   }
 
   if (!recordsProcessed) throw new Error('No valid records found.');
