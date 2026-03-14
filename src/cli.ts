@@ -1,19 +1,7 @@
 #!/usr/bin/env node
 
 import { parseREVLOG } from './lib/revlogParser.js';
-
-/**
- * Reads all data from the standard input stream.
- * @returns A promise that resolves with the input data as a Buffer.
- */
-function readStdin(): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    process.stdin.on('data', (chunk) => chunks.push(chunk));
-    process.stdin.on('end', () => resolve(Buffer.concat(chunks)));
-    process.stdin.on('error', (err) => reject(err));
-  });
-}
+import { Readable, Writable } from 'stream';
 
 /**
  * Main function to run the CLI.
@@ -25,7 +13,7 @@ async function main() {
     console.log(`
 Usage:
   revlog-parser [inputFile] [options]
-  cat <inputFile> | revlog-parser [options]
+  cat <inputFile> | revlog-parser [options] > output.wpilog
 
 Arguments:
   inputFile        The path to the input .revlog file. If omitted,
@@ -33,14 +21,14 @@ Arguments:
 
 Options:
   -o, --output     The path to the output .wpilog file.
-                   If not provided, the output will be printed to the console.
+                   If not provided, the output will be piped directly to stdout.
   -h, --help       Show this help message.
     `);
     return;
   }
 
-  let inputSource: string | Buffer | undefined = undefined;
-  let outputFilename: string | undefined = undefined;
+  let inputSource: string | Readable;
+  let outputTarget: string | Writable | undefined = undefined;
 
   try {
     // --- Flexible Argument Parsing ---
@@ -58,7 +46,20 @@ Options:
         );
         process.exit(1);
       }
-      outputFilename = args[outputFlagIndex + 1];
+      outputTarget = args[outputFlagIndex + 1];
+    } else {
+      // If no output file is provided, check if we are piping.
+      // If we are attached to a terminal (TTY), refuse to dump binary.
+      if (process.stdout.isTTY) {
+        console.error(
+          'Error: Refusing to write binary log data directly to the terminal.\n' +
+            'Please specify an output file using "-o <filename>" or pipe/redirect the output (e.g., "> output.wpilog").'
+        );
+        process.exit(1);
+      }
+
+      // If isTTY is false, we are safely piped or redirected.
+      outputTarget = process.stdout;
     }
 
     const nonFlagArgs = args.filter((arg, index) => {
@@ -86,19 +87,17 @@ Options:
         );
         process.exit(1);
       }
-      inputSource = await readStdin();
-      if (inputSource.length === 0) {
-        console.error('Error: Standard input was empty.');
-        process.exit(1);
-      }
+      // Pass the stdin stream directly! No buffering.
+      inputSource = process.stdin;
     }
 
-    const wpilogContent = await parseREVLOG(inputSource, outputFilename);
+    // Pass the streams down to the parser
+    await parseREVLOG(inputSource, outputTarget);
 
-    if (outputFilename) {
-      console.error(`Successfully wrote WPILOG to "${outputFilename}"`);
-    } else {
-      process.stdout.write(wpilogContent);
+    // Only print the success message if we wrote to a file.
+    // If we piped to stdout, writing logs to the console would corrupt the binary data!
+    if (typeof outputTarget === 'string') {
+      console.error(`Successfully wrote WPILOG to "${outputTarget}"`);
     }
   } catch (error) {
     console.error('An error occurred:', error);
