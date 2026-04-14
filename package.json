@@ -1,6 +1,6 @@
 {
   "name": "@rev-robotics/revlog-converter",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "author": "REV Robotics",
   "license": "BSD-3-Clause",
   "description": "Tool to parse and convert .revlog files produced by REVLib's StatusLogger to .wpilog files",
