@@ -77,6 +77,7 @@ export async function parseREVLOG(
   const ENCODER_ID = 7;
 
   const RECORDS = new Map<string, { id: number; type: string }>();
+  const FAST_RECORDS = new Map<number, { id: number; type: string }>();
   let NEXT_RECORD_ID = 1;
   let recordsProcessed = false;
 
@@ -222,6 +223,63 @@ export async function parseREVLOG(
     writeOut(payload);
   };
 
+  const writeRecordFast = (
+    recordInfo: { id: number; type: string },
+    entryValue: string | number | boolean | bigint,
+    timestampMs: number
+  ) => {
+    let payload: Buffer;
+    switch (recordInfo.type) {
+      case 'boolean':
+        payload = Buffer.alloc(1);
+        payload.writeUInt8(entryValue ? 1 : 0, 0);
+        break;
+      case 'int64':
+        payload = Buffer.alloc(8);
+        try {
+          payload.writeBigInt64LE(
+            BigInt(
+              typeof entryValue === 'number'
+                ? Math.round(entryValue)
+                : entryValue
+            ),
+            0
+          );
+        } catch {
+          payload.writeBigInt64LE(0n, 0);
+        }
+        break;
+      case 'float':
+        payload = Buffer.alloc(4);
+        payload.writeFloatLE(Number(entryValue), 0);
+        break;
+      case 'double':
+        payload = Buffer.alloc(8);
+        payload.writeDoubleLE(Number(entryValue), 0);
+        break;
+      case 'string':
+        payload = Buffer.from(String(entryValue), 'utf-8');
+        break;
+      default:
+        return;
+    }
+
+    const payloadSize = payload.length;
+    const timestampUs = BigInt(timestampMs) * 1000n;
+    const bitfield =
+      (requiredBytes(recordInfo.id) - 1) |
+      ((requiredBytes(payloadSize) - 1) << 2) |
+      ((requiredTimestampBytes(timestampUs) - 1) << 4);
+
+    writeOut(Buffer.from([bitfield]));
+    writeOut(writeVariableInt(recordInfo.id, requiredBytes(recordInfo.id)));
+    writeOut(writeVariableInt(payloadSize, requiredBytes(payloadSize)));
+    writeOut(
+      writeVariableInt(timestampUs, requiredTimestampBytes(timestampUs))
+    );
+    writeOut(payload);
+  };
+
   const getWpilogTypeFromSignal = (signal: Signal): string => {
     if (signal.length === 1) return 'boolean';
     const isFloat =
@@ -256,10 +314,7 @@ export async function parseREVLOG(
     firmwareFrameId?: number;
     firmwareMessageName?: string;
     periodicFrames: Map<number, Message>;
-    parseFirmwareVersion(
-      decoded: DecodedSignal[],
-      data?: Buffer
-    ): string;
+    parseFirmwareVersion(decoded: DecodedSignal[], data?: Buffer): string;
   }
 
   const sparkDbc = await readDbcFile('spark.public.dbc');
@@ -445,29 +500,46 @@ export async function parseREVLOG(
                   device.canDecoder.createFrame(messageSpec.id, alignedData)
                 );
                 if (decoded) {
+                  let sigIndex = 0; // Track the index manually
+
                   for (const sig of decoded) {
-                    const signalSpec = messageSpec.signals.get(sig.name);
-                    if (!signalSpec) continue;
+                    // Generate our unique math-based key
+                    const fastKey = messageId * 256 + sigIndex;
 
-                    const folder = sig.name.endsWith('FAULT')
-                      ? '/FAULT/'
-                      : sig.name.endsWith('WARNING')
-                        ? '/WARNING/'
-                        : '/';
-                    const name = `${device.prefix}${messageId & 0x3f}${folder}${sig.name}`;
+                    let recordInfo = FAST_RECORDS.get(fastKey);
 
-                    if (!RECORDS.has(name)) {
+                    // SLOW PATH: We have never seen this signal before.
+                    // Do the string math, register it, and cache it.
+                    if (!recordInfo) {
+                      const signalSpec = messageSpec.signals.get(sig.name);
+                      if (!signalSpec) {
+                        sigIndex++;
+                        continue;
+                      }
+
+                      const folder = sig.name.endsWith('FAULT')
+                        ? '/FAULT/'
+                        : sig.name.endsWith('WARNING')
+                          ? '/WARNING/'
+                          : '/';
+                      const name = `${device.prefix}${messageId & 0x3f}${folder}${sig.name}`;
+
                       const wpilogType = getWpilogTypeFromSignal(signalSpec);
                       const metadata =
                         signalSpec.description ?? signalSpec.unit ?? '';
-                      writeControlRecord(
-                        NEXT_RECORD_ID++,
-                        name,
-                        wpilogType,
-                        metadata
-                      );
+
+                      const newId = NEXT_RECORD_ID++;
+                      writeControlRecord(newId, name, wpilogType, metadata);
+
+                      // Save it to the fast cache
+                      recordInfo = { id: newId, type: wpilogType };
+                      FAST_RECORDS.set(fastKey, recordInfo);
                     }
-                    writeRecord(name, sig.value, msgTsMs);
+
+                    // FAST PATH: Write immediately using the cached info. No strings attached!
+                    writeRecordFast(recordInfo, sig.value, msgTsMs);
+
+                    sigIndex++;
                   }
                 }
               } catch (e) {
