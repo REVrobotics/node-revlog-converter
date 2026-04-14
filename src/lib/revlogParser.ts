@@ -2,7 +2,7 @@ import { promises as fs, createReadStream, createWriteStream } from 'fs';
 import { Readable, Writable } from 'stream';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Dbc, CanDecoder, BoundSignal, Message, Signal } from './revDBC.js';
+import { Dbc, CanDecoder, Message, Signal, DecodedSignal } from './revDBC.js';
 
 export async function parseREVLOG(
   input: string | Buffer | Readable,
@@ -257,7 +257,7 @@ export async function parseREVLOG(
     firmwareMessageName?: string;
     periodicFrames: Map<number, Message>;
     parseFirmwareVersion(
-      decoded: Map<string, BoundSignal>,
+      decoded: DecodedSignal[],
       data?: Buffer
     ): string;
   }
@@ -411,7 +411,7 @@ export async function parseREVLOG(
               }
               writeRecord(
                 name,
-                device.parseFirmwareVersion(decoded.boundSignals, canData),
+                device.parseFirmwareVersion(decoded, canData),
                 0
               );
             }
@@ -445,19 +445,16 @@ export async function parseREVLOG(
                   device.canDecoder.createFrame(messageSpec.id, alignedData)
                 );
                 if (decoded) {
-                  for (const [
-                    signalName,
-                    boundSignal,
-                  ] of decoded.boundSignals) {
-                    const signalSpec = messageSpec.signals.get(signalName);
+                  for (const sig of decoded) {
+                    const signalSpec = messageSpec.signals.get(sig.name);
                     if (!signalSpec) continue;
 
-                    const folder = signalName.endsWith('FAULT')
+                    const folder = sig.name.endsWith('FAULT')
                       ? '/FAULT/'
-                      : signalName.endsWith('WARNING')
+                      : sig.name.endsWith('WARNING')
                         ? '/WARNING/'
                         : '/';
-                    const name = `${device.prefix}${messageId & 0x3f}${folder}${signalName}`;
+                    const name = `${device.prefix}${messageId & 0x3f}${folder}${sig.name}`;
 
                     if (!RECORDS.has(name)) {
                       const wpilogType = getWpilogTypeFromSignal(signalSpec);
@@ -470,7 +467,7 @@ export async function parseREVLOG(
                         metadata
                       );
                     }
-                    writeRecord(name, boundSignal.value, msgTsMs);
+                    writeRecord(name, sig.value, msgTsMs);
                   }
                 }
               } catch (e) {
