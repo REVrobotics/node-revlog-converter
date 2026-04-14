@@ -1,34 +1,65 @@
-import { promises as fs } from 'fs';
+import { promises as fs, createReadStream, createWriteStream } from 'fs';
+import { Readable, Writable } from 'stream';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Dbc, CanDecoder, BoundSignal, Message, Signal } from './revDBC.js';
+import { Dbc, CanDecoder, Message, Signal, DecodedSignal } from './revDBC.js';
 
 export async function parseREVLOG(
-  input: string | Buffer,
-  outputFilename?: string
-): Promise<Buffer> {
-  // --- Load Input Data ---
-  let binary_data: Buffer;
-  if (Buffer.isBuffer(input)) {
-    binary_data = input;
+  input: string | Buffer | Readable,
+  outputTarget?: string | Writable
+): Promise<void> {
+  // --- Stream Setup ---
+  let readStream: Readable;
+  let writeStream: Writable | null = null;
+
+  // Handle Input
+  if (input instanceof Readable) {
+    readStream = input; // Captures process.stdin
+  } else if (Buffer.isBuffer(input)) {
+    readStream = Readable.from(input);
   } else if (typeof input === 'string') {
-    try {
-      binary_data = await fs.readFile(input);
-    } catch (error) {
-      const err = error as Error;
-      throw new Error(
-        `Could not read input file at '${input}': ${err.message}`
-      );
-    }
+    readStream = createReadStream(input, { highWaterMark: 64 * 1024 });
   } else {
     throw new Error(
-      'Invalid input type. Must be a file path (string) or a Buffer.'
+      'Invalid input type. Must be a path, Buffer, or Readable stream.'
     );
   }
 
-  if (binary_data.length < 3) {
-    throw new Error('REVLOG file is empty or too small to be valid.');
+  // Handle Output
+  if (outputTarget instanceof Writable) {
+    writeStream = outputTarget; // Captures process.stdout
+  } else if (typeof outputTarget === 'string') {
+    writeStream = createWriteStream(outputTarget);
   }
+
+  const outputChunks: Buffer[] = [];
+  let stagingBuffer: Buffer[] = [];
+  let stagingSize = 0;
+
+  const writeOut = (data: Buffer) => {
+    if (writeStream) {
+      stagingBuffer.push(data);
+      stagingSize += data.length;
+    } else {
+      // Fallback if no output stream is provided
+      outputChunks.push(data);
+    }
+  };
+
+  // New helper to cleanly flush data to the OS and handle backpressure
+  const flushStaging = async () => {
+    if (writeStream && stagingBuffer.length > 0) {
+      const buf = Buffer.concat(stagingBuffer);
+      stagingBuffer = [];
+      stagingSize = 0;
+
+      // Write the massive chunk all at once
+      if (!writeStream.write(buf)) {
+        // If the OS buffer is full, wait for it to drain before continuing
+        await new Promise((resolve) => writeStream!.once('drain', resolve));
+      }
+    }
+  };
 
   // --- Constants ---
   const HEADER = 'WPILOG';
@@ -46,8 +77,8 @@ export async function parseREVLOG(
   const ENCODER_ID = 7;
 
   const RECORDS = new Map<string, { id: number; type: string }>();
+  const FAST_RECORDS = new Map<number, { id: number; type: string }>();
   let NEXT_RECORD_ID = 1;
-  const outputChunks: Buffer[] = [];
   let recordsProcessed = false;
 
   // --- Helpers ---
@@ -64,7 +95,7 @@ export async function parseREVLOG(
   const writeVariableInt = (value: number | bigint, length: number): Buffer => {
     const buf = Buffer.alloc(8);
     buf.writeBigUInt64LE(typeof value === 'bigint' ? value : BigInt(value));
-    return buf.slice(0, length);
+    return buf.subarray(0, length);
   };
 
   const requiredBytes = (value: number): 1 | 2 | 3 | 4 => {
@@ -123,13 +154,12 @@ export async function parseREVLOG(
       ((requiredBytes(payload.length) - 1) << 2) |
       ((requiredTimestampBytes(0n) - 1) << 4);
 
-    outputChunks.push(
-      Buffer.from([bitfield]),
-      writeVariableInt(0, requiredBytes(0)),
-      writeVariableInt(payload.length, requiredBytes(payload.length)),
-      writeVariableInt(0n, requiredTimestampBytes(0n)),
-      payload
-    );
+    writeOut(Buffer.from([bitfield]));
+    writeOut(writeVariableInt(0, requiredBytes(0)));
+    writeOut(writeVariableInt(payload.length, requiredBytes(payload.length)));
+    writeOut(writeVariableInt(0n, requiredTimestampBytes(0n)));
+    writeOut(payload);
+
     RECORDS.set(entryName, { id: entryId, type: dataType });
   };
 
@@ -184,13 +214,70 @@ export async function parseREVLOG(
       ((requiredBytes(payloadSize) - 1) << 2) |
       ((requiredTimestampBytes(timestampUs) - 1) << 4);
 
-    outputChunks.push(
-      Buffer.from([bitfield]),
-      writeVariableInt(recordInfo.id, requiredBytes(recordInfo.id)),
-      writeVariableInt(payloadSize, requiredBytes(payloadSize)),
-      writeVariableInt(timestampUs, requiredTimestampBytes(timestampUs)),
-      payload
+    writeOut(Buffer.from([bitfield]));
+    writeOut(writeVariableInt(recordInfo.id, requiredBytes(recordInfo.id)));
+    writeOut(writeVariableInt(payloadSize, requiredBytes(payloadSize)));
+    writeOut(
+      writeVariableInt(timestampUs, requiredTimestampBytes(timestampUs))
     );
+    writeOut(payload);
+  };
+
+  const writeRecordFast = (
+    recordInfo: { id: number; type: string },
+    entryValue: string | number | boolean | bigint,
+    timestampMs: number
+  ) => {
+    let payload: Buffer;
+    switch (recordInfo.type) {
+      case 'boolean':
+        payload = Buffer.alloc(1);
+        payload.writeUInt8(entryValue ? 1 : 0, 0);
+        break;
+      case 'int64':
+        payload = Buffer.alloc(8);
+        try {
+          payload.writeBigInt64LE(
+            BigInt(
+              typeof entryValue === 'number'
+                ? Math.round(entryValue)
+                : entryValue
+            ),
+            0
+          );
+        } catch {
+          payload.writeBigInt64LE(0n, 0);
+        }
+        break;
+      case 'float':
+        payload = Buffer.alloc(4);
+        payload.writeFloatLE(Number(entryValue), 0);
+        break;
+      case 'double':
+        payload = Buffer.alloc(8);
+        payload.writeDoubleLE(Number(entryValue), 0);
+        break;
+      case 'string':
+        payload = Buffer.from(String(entryValue), 'utf-8');
+        break;
+      default:
+        return;
+    }
+
+    const payloadSize = payload.length;
+    const timestampUs = BigInt(timestampMs) * 1000n;
+    const bitfield =
+      (requiredBytes(recordInfo.id) - 1) |
+      ((requiredBytes(payloadSize) - 1) << 2) |
+      ((requiredTimestampBytes(timestampUs) - 1) << 4);
+
+    writeOut(Buffer.from([bitfield]));
+    writeOut(writeVariableInt(recordInfo.id, requiredBytes(recordInfo.id)));
+    writeOut(writeVariableInt(payloadSize, requiredBytes(payloadSize)));
+    writeOut(
+      writeVariableInt(timestampUs, requiredTimestampBytes(timestampUs))
+    );
+    writeOut(payload);
   };
 
   const getWpilogTypeFromSignal = (signal: Signal): string => {
@@ -210,7 +297,6 @@ export async function parseREVLOG(
   const readDbcFile = async (fileName: string): Promise<Dbc> => {
     let dbcPath: string;
     try {
-      // __dirname is not available in ES modules, so we derive it from import.meta.url if it fails
       dbcPath = path.join(__dirname, 'resources', fileName);
     } catch (err) {
       const __filename = fileURLToPath(import.meta.url);
@@ -228,10 +314,7 @@ export async function parseREVLOG(
     firmwareFrameId?: number;
     firmwareMessageName?: string;
     periodicFrames: Map<number, Message>;
-    parseFirmwareVersion(
-      decoded: Map<string, BoundSignal>,
-      data?: Buffer
-    ): string;
+    parseFirmwareVersion(decoded: DecodedSignal[], data?: Buffer): string;
   }
 
   const sparkDbc = await readDbcFile('spark.public.dbc');
@@ -242,8 +325,8 @@ export async function parseREVLOG(
     dbc: Dbc,
     prefix: string,
     fwName: string,
-    periodicPrefix: string = 'STATUS_', // Default to STATUS_
-    customVersionParser?: (data: Buffer) => string // Optional custom logic
+    periodicPrefix: string = 'STATUS_',
+    customVersionParser?: (data: Buffer) => string
   ): Device => ({
     canDecoder: (() => {
       const c = new CanDecoder();
@@ -256,24 +339,16 @@ export async function parseREVLOG(
     firmwareMessageName: fwName,
     periodicFrames: new Map(
       [...dbc.messages.values()]
-        // Filter by the device-specific prefix (STATUS_ or PERIODIC_FRAME_)
         .filter((m) => m.name.startsWith(periodicPrefix))
         .map((m) => {
-          // Extract API Index (bits 6-9 of CAN ID)
           const apiIndex = (m.id >> 6) & 0xf;
           return [apiIndex, m];
         })
     ),
     parseFirmwareVersion: (decoded, data) => {
       if (!data || data.length === 0) return '0.0.0';
+      if (customVersionParser) return customVersionParser(data);
 
-      if (customVersionParser) {
-        return customVersionParser(data);
-      }
-
-      // Default Parser (Spark / ServoHub)
-      // Major(0), Minor(1), Build(2-3 Big Endian)
-      // Safe access
       const major = data.length > 0 ? data.readUInt8(0) : 0;
       const minor = data.length > 1 ? data.readUInt8(1) : 0;
       const build = data.length > 3 ? data.readUInt16BE(2) : 0;
@@ -283,19 +358,14 @@ export async function parseREVLOG(
 
   const devices = new Map<number, Device>();
 
-  // 1. Spark
   devices.set(
     MOTOR_CONTROLLER_ID,
     createDeviceMap(sparkDbc, SPARK_PREFIX, 'GET_FIRMWARE_VERSION')
   );
-
-  // 2. Servo Hub
   devices.set(
     SERVO_CONTROLLER_ID,
     createDeviceMap(servohubDbc, SERVO_HUB_PREFIX, 'GET_VERSION')
   );
-
-  // 3. Encoder
   devices.set(
     ENCODER_ID,
     createDeviceMap(
@@ -304,11 +374,7 @@ export async function parseREVLOG(
       'GET_VERSIONING_RESP',
       'PERIODIC_FRAME_',
       (data: Buffer) => {
-        // Custom Parser for Encoder
-        // 0:HW_Min, 1:HW_Maj, 2:SW_Pre, 3:SW_Fix, 4:SW_Min, 5:SW_Maj
-        // Target: Maj.Min.Fix -> Bytes 5, 4, 3
         if (data.length < 6) return '0.0.0';
-
         const swMajor = data.readUInt8(5);
         const swMinor = data.readUInt8(4);
         const swFix = data.readUInt8(3);
@@ -317,167 +383,202 @@ export async function parseREVLOG(
     )
   );
 
-  // --- File Header ---
-  outputChunks.push(
-    Buffer.from(HEADER, 'utf-8'),
+  // --- Write File Header ---
+  writeOut(Buffer.from(HEADER, 'utf-8'));
+  writeOut(
     (() => {
       const b = Buffer.alloc(6);
       b.writeUInt16LE((VERSION_MAJOR << 8) | VERSION_MINOR, 0);
       b.writeUInt32LE(Buffer.byteLength(EXTRA_HEADER), 2);
       return b;
-    })(),
-    Buffer.from(EXTRA_HEADER, 'utf-8')
+    })()
   );
+  writeOut(Buffer.from(EXTRA_HEADER, 'utf-8'));
 
-  let cursor = 0;
+  // --- Core Processing Loop ---
+  let accumulator = Buffer.alloc(0);
 
-  await new Promise<void>((resolve, reject) => {
-    const parseChunk = () => {
-      const startTick = Date.now();
+  for await (const chunk of readStream) {
+    // Append new chunk to our working buffer
+    accumulator = Buffer.concat([accumulator, chunk]);
+    let cursor = 0;
+
+    while (cursor < accumulator.length) {
+      const bitfield = accumulator[cursor];
+      const entryIdLen = (bitfield & 0b11) + 1;
+      const sizeLen = ((bitfield >> 2) & 0b11) + 1;
+
+      // 1. Check if we have enough bytes just to read the variable integers
+      if (cursor + 1 + entryIdLen + sizeLen > accumulator.length) break;
+
+      let tempCursor = cursor + 1;
+      let entryId, payloadSize;
 
       try {
-        while (cursor < binary_data.length) {
-          // Check if we have exceeded our time slice
-          if (Date.now() - startTick > 15) {
-            setImmediate(parseChunk); // Yield to Event Loop
-            return; // Exit current stack frame
+        [entryId, tempCursor] = readVariableInt(
+          accumulator,
+          tempCursor,
+          entryIdLen
+        );
+        [payloadSize, tempCursor] = readVariableInt(
+          accumulator,
+          tempCursor,
+          sizeLen
+        );
+
+        if (payloadSize > 5 * 1024 * 1024) {
+          // 5MB sanity limit
+          throw new Error(
+            `Corrupted file: unrealistic payload size of ${payloadSize} bytes.`
+          );
+        }
+      } catch (e) {
+        break; // Awaiting more data
+      }
+
+      // 2. Check if the entire payload is loaded in the accumulator
+      if (tempCursor + payloadSize > accumulator.length) break;
+
+      // 3. We have a full, valid record
+      const payloadBytes = accumulator.subarray(
+        tempCursor,
+        tempCursor + payloadSize
+      );
+
+      if (entryId === 1) {
+        // Firmware
+        recordsProcessed = true;
+        for (let pc = 0; pc + 10 <= payloadBytes.length; pc += 10) {
+          const messageId = payloadBytes.readUInt32LE(pc);
+          const canData = payloadBytes.subarray(pc + 4, pc + 10);
+          const deviceType = (messageId >> 24) & 0x1f;
+          const device = devices.get(deviceType);
+
+          if (device && device.firmwareFrameId) {
+            const padded = Buffer.concat([canData, Buffer.alloc(8)]);
+            const decoded = device.canDecoder.decode(
+              device.canDecoder.createFrame(device.firmwareFrameId, padded)
+            );
+            if (decoded) {
+              const name = `${device.prefix}${messageId & 0x3f}/FIRMWARE`;
+              if (!RECORDS.has(name)) {
+                writeControlRecord(NEXT_RECORD_ID++, name, 'string', '');
+              }
+              writeRecord(
+                name,
+                device.parseFirmwareVersion(decoded, canData),
+                0
+              );
+            }
           }
+        }
+      } else if (entryId === 2) {
+        // Periodic
+        recordsProcessed = true;
+        for (let pc = 0; pc + 16 <= payloadBytes.length; pc += 16) {
+          const msgTsMs = payloadBytes.readUInt32LE(pc);
+          const messageId = payloadBytes.readUInt32LE(pc + 4);
+          const canData = payloadBytes.subarray(pc + 8, pc + 16);
+          const deviceType = (messageId >> 24) & 0x1f;
+          const device = devices.get(deviceType);
 
-          if (cursor + 1 > binary_data.length) break;
-          const bitfield = binary_data[cursor];
-          cursor++;
+          if (device) {
+            const frameIndex = (messageId >> 6) & 0xf;
+            const messageSpec = device.periodicFrames.get(frameIndex);
 
-          const entryIdLen = (bitfield & 0b11) + 1;
-          const sizeLen = ((bitfield >> 2) & 0b11) + 1;
+            if (messageSpec) {
+              let alignedData = canData;
+              if (canData.length < messageSpec.dlc) {
+                alignedData = Buffer.concat([
+                  canData,
+                  Buffer.alloc(messageSpec.dlc - canData.length),
+                ]);
+              }
 
-          let entryId, payloadSize;
-          try {
-            [entryId, cursor] = readVariableInt(
-              binary_data,
-              cursor,
-              entryIdLen
-            );
-            [payloadSize, cursor] = readVariableInt(
-              binary_data,
-              cursor,
-              sizeLen
-            );
-          } catch (e) {
-            break;
-          } // Handle truncation
-
-          if (cursor + payloadSize > binary_data.length) break;
-          const payloadBytes = binary_data.slice(cursor, cursor + payloadSize);
-          cursor += payloadSize;
-
-          if (entryId === 1) {
-            // Firmware
-            recordsProcessed = true;
-            for (let pc = 0; pc + 10 <= payloadBytes.length; pc += 10) {
-              const messageId = payloadBytes.readUInt32LE(pc);
-              const canData = payloadBytes.slice(pc + 4, pc + 10);
-              const deviceType = (messageId >> 24) & 0x1f;
-              const device = devices.get(deviceType);
-
-              if (device && device.firmwareFrameId) {
-                // Pad to 8 bytes for safe decoding
-                const padded = Buffer.concat([canData, Buffer.alloc(8)]);
+              try {
                 const decoded = device.canDecoder.decode(
-                  device.canDecoder.createFrame(device.firmwareFrameId, padded)
+                  device.canDecoder.createFrame(messageSpec.id, alignedData)
                 );
                 if (decoded) {
-                  const name = `${device.prefix}${messageId & 0x3f}/FIRMWARE`;
-                  if (!RECORDS.has(name)) {
-                    writeControlRecord(NEXT_RECORD_ID++, name, 'string', '');
-                  }
-                  // FIX: Write record every time (outside the if block)
-                  writeRecord(
-                    name,
-                    device.parseFirmwareVersion(decoded.boundSignals, canData),
-                    0
-                  );
-                }
-              }
-            }
-          } else if (entryId === 2) {
-            // Periodic
-            recordsProcessed = true;
-            for (let pc = 0; pc + 16 <= payloadBytes.length; pc += 16) {
-              const msgTsMs = payloadBytes.readUInt32LE(pc);
-              const messageId = payloadBytes.readUInt32LE(pc + 4);
-              const canData = payloadBytes.slice(pc + 8, pc + 16);
-              const deviceType = (messageId >> 24) & 0x1f;
-              const device = devices.get(deviceType);
+                  let sigIndex = 0; // Track the index manually
 
-              if (device) {
-                const frameIndex = (messageId >> 6) & 0xf;
-                const messageSpec = device.periodicFrames.get(frameIndex);
+                  for (const sig of decoded) {
+                    // Generate our unique math-based key
+                    const fastKey = messageId * 256 + sigIndex;
 
-                if (messageSpec) {
-                  let alignedData = canData;
-                  if (canData.length < messageSpec.dlc) {
-                    alignedData = Buffer.concat([
-                      canData,
-                      Buffer.alloc(messageSpec.dlc - canData.length),
-                    ]);
-                  }
+                    let recordInfo = FAST_RECORDS.get(fastKey);
 
-                  try {
-                    const decoded = device.canDecoder.decode(
-                      device.canDecoder.createFrame(messageSpec.id, alignedData)
-                    );
-                    if (decoded) {
-                      for (const [
-                        signalName,
-                        boundSignal,
-                      ] of decoded.boundSignals) {
-                        const signalSpec = messageSpec.signals.get(signalName);
-                        if (!signalSpec) continue;
-
-                        const folder = signalName.endsWith('FAULT')
-                          ? '/FAULT/'
-                          : signalName.endsWith('WARNING')
-                            ? '/WARNING/'
-                            : '/';
-                        const name = `${device.prefix}${messageId & 0x3f}${folder}${signalName}`;
-
-                        if (!RECORDS.has(name)) {
-                          const wpilogType =
-                            getWpilogTypeFromSignal(signalSpec);
-                          const metadata =
-                            signalSpec.description ?? signalSpec.unit ?? '';
-                          writeControlRecord(
-                            NEXT_RECORD_ID++,
-                            name,
-                            wpilogType,
-                            metadata
-                          );
-                        }
-                        writeRecord(name, boundSignal.value, msgTsMs);
+                    // SLOW PATH: We have never seen this signal before.
+                    // Do the string math, register it, and cache it.
+                    if (!recordInfo) {
+                      const signalSpec = messageSpec.signals.get(sig.name);
+                      if (!signalSpec) {
+                        sigIndex++;
+                        continue;
                       }
+
+                      const folder = sig.name.endsWith('FAULT')
+                        ? '/FAULT/'
+                        : sig.name.endsWith('WARNING')
+                          ? '/WARNING/'
+                          : '/';
+                      const name = `${device.prefix}${messageId & 0x3f}${folder}${sig.name}`;
+
+                      const wpilogType = getWpilogTypeFromSignal(signalSpec);
+                      const metadata =
+                        signalSpec.description ?? signalSpec.unit ?? '';
+
+                      const newId = NEXT_RECORD_ID++;
+                      writeControlRecord(newId, name, wpilogType, metadata);
+
+                      // Save it to the fast cache
+                      recordInfo = { id: newId, type: wpilogType };
+                      FAST_RECORDS.set(fastKey, recordInfo);
                     }
-                  } catch (e) {
-                    /* ignore decode errors */
+
+                    // FAST PATH: Write immediately using the cached info. No strings attached!
+                    writeRecordFast(recordInfo, sig.value, msgTsMs);
+
+                    sigIndex++;
                   }
                 }
+              } catch (e) {
+                /* ignore decode errors */
               }
             }
           }
         }
-
-        // Loop finished naturally
-        resolve();
-      } catch (e) {
-        reject(e);
       }
-    };
 
-    // Start parsing loop
-    parseChunk();
-  });
+      // 4. Advance cursor past this completed record
+      cursor = tempCursor + payloadSize;
+
+      if (stagingSize >= 64 * 1024) {
+        await flushStaging();
+      }
+    }
+
+    // 5. Trim the accumulator down to only the unparsed, incomplete data
+    if (cursor > 0) {
+      accumulator = accumulator.subarray(cursor);
+    }
+
+    // 6. Check for backpressure
+    await flushStaging();
+  }
 
   if (!recordsProcessed) throw new Error('No valid records found.');
-  const finalBuffer = Buffer.concat(outputChunks);
-  if (outputFilename) await fs.writeFile(outputFilename, finalBuffer);
-  return finalBuffer;
+
+  // --- Cleanup ---
+  if (writeStream) {
+    // Only close and wait if it's NOT standard output
+    if (writeStream !== process.stdout) {
+      writeStream.end();
+      await new Promise<void>((resolve, reject) => {
+        writeStream!.on('finish', resolve);
+        writeStream!.on('error', reject);
+      });
+    }
+    return;
+  }
 }

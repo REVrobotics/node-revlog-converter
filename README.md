@@ -59,25 +59,3 @@ async function convertFile() {
     console.error('Conversion failed:', err);
   }
 }
-```
-
-#### 2\. In-Memory Conversion (Buffers)
-
-For advanced use cases (e.g., web servers, processing streams), you can pass a `Buffer` containing the REVLOG data. The function returns a `Promise<Buffer>` containing the generated WPILOG data.
-
-```typescript
-import { parseREVLOG } from '@rev-robotics/revlog-converter';
-import { promises as fs } from 'fs';
-
-async function processInMemory() {
-  // 1. Read file into memory (or receive from network)
-  const inputBuffer = await fs.readFile('./match.revlog');
-
-  // 2. Convert directly in memory
-  // passing undefined as the second argument prevents writing to disk automatically
-  const outputBuffer = await parseREVLOG(inputBuffer); 
-
-  // 3. Do something with the output buffer (e.g., upload to cloud)
-  console.log(`Generated WPILOG size: ${outputBuffer.length} bytes`);
-}
-```

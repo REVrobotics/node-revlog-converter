@@ -1,6 +1,6 @@
 {
   "name": "@rev-robotics/revlog-converter",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "author": "REV Robotics",
   "license": "BSD-3-Clause",
   "description": "Tool to parse and convert .revlog files produced by REVLib's StatusLogger to .wpilog files",
@@ -36,7 +36,7 @@
     "dev": "tsx src/cli.ts"
   },
   "devDependencies": {
-    "@types/node": "^20.19.25",
+    "@types/node": "^20.19.37",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
     "esbuild": "^0.27.1",
