@@ -32,11 +32,35 @@ export async function parseREVLOG(
     writeStream = createWriteStream(outputTarget);
   }
 
+  const outputChunks: Buffer[] = [];
+  let stagingBuffer: Buffer[] = [];
+  let stagingSize = 0;
+
   const writeOut = (data: Buffer) => {
     if (writeStream) {
-      writeStream.write(data);
+      stagingBuffer.push(data);
+      stagingSize += data.length;
+    } else {
+      // Fallback if no output stream is provided
+      outputChunks.push(data);
     }
   };
+
+  // New helper to cleanly flush data to the OS and handle backpressure
+  const flushStaging = async () => {
+    if (writeStream && stagingBuffer.length > 0) {
+      const buf = Buffer.concat(stagingBuffer);
+      stagingBuffer = [];
+      stagingSize = 0;
+
+      // Write the massive chunk all at once
+      if (!writeStream.write(buf)) {
+        // If the OS buffer is full, wait for it to drain before continuing
+        await new Promise((resolve) => writeStream!.once('drain', resolve));
+      }
+    }
+  };
+
   // --- Constants ---
   const HEADER = 'WPILOG';
   const VERSION_MAJOR = 1;
@@ -459,6 +483,10 @@ export async function parseREVLOG(
 
       // 4. Advance cursor past this completed record
       cursor = tempCursor + payloadSize;
+
+      if (stagingSize >= 64 * 1024) {
+        await flushStaging();
+      }
     }
 
     // 5. Trim the accumulator down to only the unparsed, incomplete data
@@ -467,9 +495,7 @@ export async function parseREVLOG(
     }
 
     // 6. Check for backpressure
-    if (writeStream && writeStream.writableNeedDrain) {
-      await new Promise((resolve) => writeStream!.once('drain', resolve));
-    }
+    await flushStaging();
   }
 
   if (!recordsProcessed) throw new Error('No valid records found.');
