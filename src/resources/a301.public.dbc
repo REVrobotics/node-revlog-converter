@@ -1,0 +1,359 @@
+
+VERSION ""
+
+
+NS_ :
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_:
+
+BO_ 2181234688 VELOCITY_SETPOINT: 8 Vector__XXX
+ SG_ SETPOINT : 0|32@1- (1,0) [0|0] "RPM" Vector__XXX
+ SG_ RESERVED : 32|32@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181234688 "Sets the Control Type to Velocity and sets the target velocity";
+SIG_VALTYPE_ 2181234688 SETPOINT : 1;
+
+BO_ 2181234816 DUTY_CYCLE_SETPOINT: 8 Vector__XXX
+ SG_ SETPOINT : 0|32@1- (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 32|32@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181234816 "Sets the Control Type to Duty Cycle and sets the target duty cycle (from -1.0 to 1.0)";
+SIG_VALTYPE_ 2181234816 SETPOINT : 1;
+
+BO_ 2181234944 RELATIVE_POSITION_SETPOINT: 8 Vector__XXX
+ SG_ SETPOINT : 0|32@1- (1,0) [0|0] "rotations" Vector__XXX
+ SG_ VELOCITY : 32|32@1- (1,0) [0|0] "RPM" Vector__XXX
+CM_ BO_ 2181234944 "Sets the Control Type to Relative Position and sets the target position";
+CM_ SG_ 2181234944 VELOCITY "velocity. at which to approach the position, defaults to 200 RPM";
+SIG_VALTYPE_ 2181234944 SETPOINT : 1;
+SIG_VALTYPE_ 2181234944 VELOCITY : 1;
+
+BO_ 2181235072 CURRENT_SETPOINT: 8 Vector__XXX
+ SG_ SETPOINT : 0|32@1- (1,0) [0|0] "A" Vector__XXX
+ SG_ RESERVED : 32|32@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181235072 "Sets the Control Type to Current and sets the target current";
+SIG_VALTYPE_ 2181235072 SETPOINT : 1;
+
+BO_ 2181235200 ABSOLUTE_POSITION_SETPOINT: 8 Vector__XXX
+ SG_ SETPOINT : 0|32@1- (1,0) [0|0] "rotations" Vector__XXX
+ SG_ VELOCITY : 32|32@1- (1,0) [0|0] "RPM" Vector__XXX
+CM_ BO_ 2181235200 "Sets the Control Type to Absolute Position and sets the target position";
+CM_ SG_ 2181235200 VELOCITY "velocity. at which to approach the position, defaults to 200 RPM";
+SIG_VALTYPE_ 2181235200 SETPOINT : 1;
+SIG_VALTYPE_ 2181235200 VELOCITY : 1;
+
+BO_ 2181241728 CLEAR_FAULTS: 0 Vector__XXX
+
+BO_ 2181242304 IDENTIFY: 0 Vector__XXX
+CM_ BO_ 2181242304 "Makes the A301 temporarily perform a special blink pattern that will make it stand out.";
+
+BO_ 2181243904 SET_RELATIVE_POSITION_RESPONSE: 4 Vector__XXX
+ SG_ POSITION : 0|32@1- (1,0) [0|0] "rotations" Vector__XXX
+SIG_VALTYPE_ 2181243904 POSITION : 1;
+
+BO_ 2181243968 SET_ABSOLUTE_POSITION_RESPONSE: 4 Vector__XXX
+ SG_ POSITION : 0|32@1- (1,0) [0|0] "rotations" Vector__XXX
+SIG_VALTYPE_ 2181243968 POSITION : 1;
+
+BO_ 2181244928 SET_RELATIVE_ENCODER_POSITION: 4 Vector__XXX
+ SG_ POSITION : 0|32@1- (1,0) [0|0] "rotations" Vector__XXX
+SIG_VALTYPE_ 2181244928 POSITION : 1;
+
+BO_ 2181244992 SET_ABSOLUTE_ENCODER_POSITION: 4 Vector__XXX
+ SG_ POSITION : 0|32@1- (1,0) [0|0] "rotations" Vector__XXX
+SIG_VALTYPE_ 2181244992 POSITION : 1;
+
+BO_ 2181246976 SET_CAN_ID_RESPONSE: 2 Vector__XXX
+ SG_ ID : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ WRITERESULT : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181246976 "Response to set the device's CAN ID";
+
+BO_ 2181248000 SET_CAN_ID: 1 Vector__XXX
+ SG_ ID : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181248000 "Set the device's CAN ID";
+
+BO_ 2181249024 GET_FIRMWARE_VERSION: 8 Vector__XXX
+ SG_ MAJOR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MINOR : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PATCH : 23|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ PRERELEASE : 32|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ HW_REV : 40|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 48|16@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 2181249088 GET_HARDWARE_VERSION_RESPONSE: 3 Vector__XXX
+ SG_ MAJOR_VERSION : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MINOR_VERSION : 8|16@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181249088 "Get the device's major and minor hardware version";
+
+BO_ 2181250112 GET_HARDWARE_VERSION: 0 Vector__XXX
+CM_ BO_ 2181250112 "Get the device's major and minor hardware version";
+
+BO_ 2181251072 GET_STATUS_0_PERIOD_RESPONSE: 4 Vector__XXX
+ SG_ PERIOD : 0|32@1+ (1,0) [0|0] "milliseconds" Vector__XXX
+CM_ BO_ 2181251072 "Response to Get Status 0 Period. A period of 0 means the status frame is disabled.";
+
+BO_ 2181251136 GET_STATUS_1_PERIOD_RESPONSE: 4 Vector__XXX
+ SG_ PERIOD : 0|32@1+ (1,0) [0|0] "milliseconds" Vector__XXX
+CM_ BO_ 2181251136 "Response to Get Status 1 Period. A period of 0 means the status frame is disabled.";
+
+BO_ 2181251200 GET_STATUS_2_PERIOD_RESPONSE: 4 Vector__XXX
+ SG_ PERIOD : 0|32@1+ (1,0) [0|0] "milliseconds" Vector__XXX
+CM_ BO_ 2181251200 "Response to Get Status 2 Period. A period of 0 means the status frame is disabled.";
+
+BO_ 2181251264 GET_STATUS_3_PERIOD_RESPONSE: 4 Vector__XXX
+ SG_ PERIOD : 0|32@1+ (1,0) [0|0] "milliseconds" Vector__XXX
+CM_ BO_ 2181251264 "Response to Get Status 3 Period. A period of 0 means the status frame is disabled.";
+
+BO_ 2181252096 GET_STATUS_0_PERIOD: 0 Vector__XXX
+CM_ BO_ 2181252096 "Get the period of the Status 0 frame";
+
+BO_ 2181252160 GET_STATUS_1_PERIOD: 0 Vector__XXX
+CM_ BO_ 2181252160 "Get the period of the Status 1 frame";
+
+BO_ 2181252224 GET_STATUS_2_PERIOD: 0 Vector__XXX
+CM_ BO_ 2181252224 "Get the period of the Status 2 frame";
+
+BO_ 2181252288 GET_STATUS_3_PERIOD: 0 Vector__XXX
+CM_ BO_ 2181252288 "Get the period of the Status 3 frame";
+
+BO_ 2181253120 SET_STATUS_0_PERIOD_RESPONSE: 5 Vector__XXX
+ SG_ RESULT_CODE : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PERIOD : 8|32@1+ (1,0) [0|0] "milliseconds" Vector__XXX
+CM_ BO_ 2181253120 "Response to Set Status 0 Period";
+CM_ SG_ 2181253120 RESULT_CODE "0 on success";
+
+BO_ 2181253184 SET_STATUS_1_PERIOD_RESPONSE: 5 Vector__XXX
+ SG_ RESULT_CODE : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PERIOD : 8|32@1+ (1,0) [0|0] "milliseconds" Vector__XXX
+CM_ BO_ 2181253184 "Response to Set Status 1 Period";
+CM_ SG_ 2181253184 RESULT_CODE "0 on success";
+
+BO_ 2181253248 SET_STATUS_2_PERIOD_RESPONSE: 5 Vector__XXX
+ SG_ RESULT_CODE : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PERIOD : 8|32@1+ (1,0) [0|0] "milliseconds" Vector__XXX
+CM_ BO_ 2181253248 "Response to Set Status 2 Period";
+CM_ SG_ 2181253248 RESULT_CODE "0 on success";
+
+BO_ 2181253312 SET_STATUS_3_PERIOD_RESPONSE: 5 Vector__XXX
+ SG_ RESULT_CODE : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PERIOD : 8|32@1+ (1,0) [0|0] "milliseconds" Vector__XXX
+CM_ BO_ 2181253312 "Response to Set Status 3 Period";
+CM_ SG_ 2181253312 RESULT_CODE "0 on success";
+
+BO_ 2181254144 SET_STATUS_0_PERIOD: 4 Vector__XXX
+ SG_ PERIOD : 0|32@1+ (1,0) [0|0] "milliseconds" Vector__XXX
+CM_ BO_ 2181254144 "Set the period of the Status 0 frame. 0 will disable the status frame.";
+
+BO_ 2181254208 SET_STATUS_1_PERIOD: 4 Vector__XXX
+ SG_ PERIOD : 0|32@1+ (1,0) [0|0] "milliseconds" Vector__XXX
+CM_ BO_ 2181254208 "Set the period of the Status 1 frame. 0 will disable the status frame.";
+
+BO_ 2181254272 SET_STATUS_2_PERIOD: 4 Vector__XXX
+ SG_ PERIOD : 0|32@1+ (1,0) [0|0] "milliseconds" Vector__XXX
+CM_ BO_ 2181254272 "Set the period of the Status 2 frame. 0 will disable the status frame.";
+
+BO_ 2181254336 SET_STATUS_3_PERIOD: 4 Vector__XXX
+ SG_ PERIOD : 0|32@1+ (1,0) [0|0] "milliseconds" Vector__XXX
+CM_ BO_ 2181254336 "Set the period of the Status 3 frame. 0 will disable the status frame.";
+
+BO_ 2181255168 GET_IDLE_MODE_RESP: 4 Vector__XXX
+ SG_ IDLE_MODE : 0|32@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181255168 "Response to 'Get Idle Mode'. Returns the value of the Idle Mode parameter";
+CM_ SG_ 2181255168 IDLE_MODE "The A301's disabled behavior type.";
+
+BO_ 2181255232 GET_INVERTED_RESP: 1 Vector__XXX
+ SG_ INVERTED : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 1|7@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181255232 "Response to 'Get Inverted'. Returns the value of the Inverted parameter";
+CM_ SG_ 2181255232 INVERTED "Sets whether the motor output is inverted. When true, positive setpoints spin the motor in the opposite direction, and reported encoder position and velocity are negated to match. Equivalent to the SPARK kInverted parameter.";
+
+BO_ 2181255296 GET_CONTINUOUS_INPUT_RESP: 1 Vector__XXX
+ SG_ CONTINUOUS_INPUT : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 1|7@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181255296 "Response to 'Get Continuous Input'. Returns the value of the Continuous Input parameter";
+CM_ SG_ 2181255296 CONTINUOUS_INPUT "Sets whether Absolute Position Continuous Input is enabled.";
+
+BO_ 2181255360 GET_ABS_RANGE_OFFSET_RESP: 4 Vector__XXX
+ SG_ ABS_RANGE_OFFSET : 0|32@1- (1,0) [0|0] "rotations" Vector__XXX
+CM_ BO_ 2181255360 "Response to 'Get Abs Range Offset'. Returns the value of the Abs Range Offset parameter";
+CM_ SG_ 2181255360 ABS_RANGE_OFFSET "Sets the Absolute Encoder Range Offset about zero. Moves the range between (-1, 0] and [0, 1), instead of the default range [-0.5, 0.5), assuming the default units of rotations.";
+SIG_VALTYPE_ 2181255360 ABS_RANGE_OFFSET : 1;
+
+BO_ 2181256192 GET_IDLE_MODE: 0 Vector__XXX
+CM_ BO_ 2181256192 "Requests the value of the Idle Mode parameter";
+
+BO_ 2181256256 GET_INVERTED: 0 Vector__XXX
+CM_ BO_ 2181256256 "Requests the value of the Inverted parameter";
+
+BO_ 2181256320 GET_CONTINUOUS_INPUT: 0 Vector__XXX
+CM_ BO_ 2181256320 "Requests the value of the Continuous Input parameter";
+
+BO_ 2181256384 GET_ABS_RANGE_OFFSET: 0 Vector__XXX
+CM_ BO_ 2181256384 "Requests the value of the Abs Range Offset parameter";
+
+BO_ 2181257216 SET_IDLE_MODE_RESP: 5 Vector__XXX
+ SG_ IDLE_MODE : 0|32@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ ERROR_CODE : 32|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181257216 "Response to 'Set Idle Mode'. Returns the applied value and a non-zero error code on failure";
+CM_ SG_ 2181257216 IDLE_MODE "The A301's disabled behavior type.";
+CM_ SG_ 2181257216 ERROR_CODE "Non-zero on error of the last request";
+
+BO_ 2181257280 SET_INVERTED_RESP: 2 Vector__XXX
+ SG_ INVERTED : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 1|7@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ ERROR_CODE : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181257280 "Response to 'Set Inverted'. Returns the applied value and a non-zero error code on failure";
+CM_ SG_ 2181257280 INVERTED "Sets whether the motor output is inverted. When true, positive setpoints spin the motor in the opposite direction, and reported encoder position and velocity are negated to match. Equivalent to the SPARK kInverted parameter.";
+CM_ SG_ 2181257280 ERROR_CODE "Non-zero on error of the last request";
+
+BO_ 2181257344 SET_CONTINUOUS_INPUT_RESP: 2 Vector__XXX
+ SG_ CONTINUOUS_INPUT : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 1|7@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ ERROR_CODE : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181257344 "Response to 'Set Continuous Input'. Returns the applied value and a non-zero error code on failure";
+CM_ SG_ 2181257344 CONTINUOUS_INPUT "Sets whether Absolute Position Continuous Input is enabled.";
+CM_ SG_ 2181257344 ERROR_CODE "Non-zero on error of the last request";
+
+BO_ 2181257408 SET_ABS_RANGE_OFFSET_RESP: 5 Vector__XXX
+ SG_ ABS_RANGE_OFFSET : 0|32@1- (1,0) [0|0] "rotations" Vector__XXX
+ SG_ ERROR_CODE : 32|8@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181257408 "Response to 'Set Abs Range Offset'. Returns the applied value and a non-zero error code on failure";
+CM_ SG_ 2181257408 ABS_RANGE_OFFSET "Sets the Absolute Encoder Range Offset about zero. Moves the range between (-1, 0] and [0, 1), instead of the default range [-0.5, 0.5), assuming the default units of rotations.";
+CM_ SG_ 2181257408 ERROR_CODE "Non-zero on error of the last request";
+SIG_VALTYPE_ 2181257408 ABS_RANGE_OFFSET : 1;
+
+BO_ 2181258240 SET_IDLE_MODE: 4 Vector__XXX
+ SG_ IDLE_MODE : 0|32@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181258240 "Updates the value of the Idle Mode parameter";
+CM_ SG_ 2181258240 IDLE_MODE "The A301's disabled behavior type.";
+
+BO_ 2181258304 SET_INVERTED: 1 Vector__XXX
+ SG_ INVERTED : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 1|7@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181258304 "Updates the value of the Inverted parameter";
+CM_ SG_ 2181258304 INVERTED "Sets whether the motor output is inverted. When true, positive setpoints spin the motor in the opposite direction, and reported encoder position and velocity are negated to match. Equivalent to the SPARK kInverted parameter.";
+
+BO_ 2181258368 SET_CONTINUOUS_INPUT: 1 Vector__XXX
+ SG_ CONTINUOUS_INPUT : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 1|7@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181258368 "Updates the value of the Continuous Input parameter";
+CM_ SG_ 2181258368 CONTINUOUS_INPUT "Sets whether Absolute Position Continuous Input is enabled.";
+
+BO_ 2181258432 SET_ABS_RANGE_OFFSET: 4 Vector__XXX
+ SG_ ABS_RANGE_OFFSET : 0|32@1- (1,0) [0|0] "rotations" Vector__XXX
+CM_ BO_ 2181258432 "Updates the value of the Abs Range Offset parameter";
+CM_ SG_ 2181258432 ABS_RANGE_OFFSET "Sets the Absolute Encoder Range Offset about zero. Moves the range between (-1, 0] and [0, 1), instead of the default range [-0.5, 0.5), assuming the default units of rotations.";
+SIG_VALTYPE_ 2181258432 ABS_RANGE_OFFSET : 1;
+
+BO_ 2181279744 BOOTLOADER_0: 8 Vector__XXX
+ SG_ BL_MAJOR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BL_MINOR : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PRODUCT_ID : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODEL : 32|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RSVD : 40|24@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181279744 "Periodic frame when device is in the bootloader";
+
+BO_ 2181281792 STATUS_0: 8 Vector__XXX
+ SG_ APPLIED_OUTPUT : 0|16@1- (0.00003082369457075716,0) [-1|1] "" Vector__XXX
+ SG_ VOLTAGE : 16|12@1+ (0.0073260073260073,0) [0|0] "V" Vector__XXX
+ SG_ CURRENT : 28|12@1+ (0.0366300366300366,0) [0|0] "A" Vector__XXX
+ SG_ MOTOR_TEMPERATURE : 40|8@1+ (1,0) [0|0] "degC" Vector__XXX
+ SG_ PRIMARY_HEARTBEAT_LOCK : 48|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ GEARBOX_RPM : 49|4@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 53|11@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181281792 "Includes general data that is likely to need frequent refreshing";
+CM_ SG_ 2181281792 PRIMARY_HEARTBEAT_LOCK "Indicates that the A301 is in competition mode and will ignore the Secondary Heartbeat until it is power cycled";
+CM_ SG_ 2181281792 GEARBOX_RPM "0: unknown/disconnected, 1: 215, 2: 500";
+
+BO_ 2181281856 STATUS_1: 8 Vector__XXX
+ SG_ OTHER_FAULT : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MOTOR_TYPE_FAULT : 1|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ SENSOR_FAULT : 2|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CAN_FAULT : 3|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ TEMPERATURE_FAULT : 4|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ DRV_FAULT : 5|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ ESC_EEPROM_FAULT : 6|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ FIRMWARE_FAULT : 7|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MOTOR_STARTUP_FAULT : 8|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED_ACTIVES : 9|5@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ OVERVOLTAGE_WARNING : 14|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MOTOR_LOOP_SPEED_WARNING : 15|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BROWNOUT_WARNING : 16|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ OVERCURRENT_WARNING : 17|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ ESC_EEPROM_WARNING : 18|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ EXT_EEPROM_WARNING : 19|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ SENSOR_WARNING : 20|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STALL_WARNING : 21|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ HAS_RESET_WARNING : 22|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ OTHER_WARNING : 23|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ OTHER_STICKY_FAULT : 24|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MOTOR_TYPE_STICKY_FAULT : 25|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ SENSOR_STICKY_FAULT : 26|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CAN_STICKY_FAULT : 27|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ TEMPERATURE_STICKY_FAULT : 28|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ DRV_STICKY_FAULT : 29|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ ESC_EEPROM_STICKY_FAULT : 30|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ FIRMWARE_STICKY_FAULT : 31|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MOTOR_STARTUP_STICKY_FAULT : 32|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED_STICKIES : 33|5@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ OVERVOLTAGE_STICKY_WARNING : 38|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MOTOR_LOOP_SPEED_STICKY_WARNING : 39|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BROWNOUT_STICKY_WARNING : 40|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ OVERCURRENT_STICKY_WARNING : 41|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ ESC_EEPROM_STICKY_WARNING : 42|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ EXT_EEPROM_STICKY_WARNING : 43|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ SENSOR_STICKY_WARNING : 44|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ STALL_STICKY_WARNING : 45|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ HAS_RESET_STICKY_WARNING : 46|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ OTHER_STICKY_WARNING : 47|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ IS_FOLLOWER : 48|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ RESERVED : 49|15@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181281856 "Includes general data that can likely tolerate infrequent refreshing";
+CM_ SG_ 2181281856 RESERVED_ACTIVES "Reserved space for future active (non-sticky) faults and warnings";
+CM_ SG_ 2181281856 RESERVED_STICKIES "Reserved space for future sticky faults and warnings";
+
+BO_ 2181281920 STATUS_2: 8 Vector__XXX
+ SG_ ENCODER_VELOCITY : 0|32@1- (1,0) [0|0] "RPM" Vector__XXX
+ SG_ RELATIVE_ENCODER_POSITION : 32|32@1- (1,0) [0|0] "rotations" Vector__XXX
+CM_ BO_ 2181281920 "Includes data from the internal encoder";
+SIG_VALTYPE_ 2181281920 ENCODER_VELOCITY : 1;
+SIG_VALTYPE_ 2181281920 RELATIVE_ENCODER_POSITION : 1;
+
+BO_ 2181281984 STATUS_3: 8 Vector__XXX
+ SG_ RESERVED : 0|32@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ ABSOLUTE_ENCODER_POSITION : 32|32@1- (1,0) [0|0] "rotations" Vector__XXX
+CM_ BO_ 2181281984 "Includes absolute position data from the internal encoder";
+CM_ SG_ 2181281984 RESERVED "Reserved";
+SIG_VALTYPE_ 2181281984 ABSOLUTE_ENCODER_POSITION : 1;
+
+BO_ 2181282816 UNIQUE_ID_BROADCAST: 4 Vector__XXX
+ SG_ UNIQUE_ID : 0|32@1+ (1,0) [0|0] "" Vector__XXX
+CM_ BO_ 2181282816 "Contains the unique ID of the device, to allow detecting duplicate CAN IDs. To avoid collisions, the A301 firmware will send this at an irregular period between 1000ms and 2000ms. A301 may use a constant period of 1000ms.";

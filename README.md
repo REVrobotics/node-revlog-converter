@@ -2,7 +2,27 @@
 
 A lightweight, robust Node.js utility for converting REV Robotics binary log files (`.revlog`) into the WPILOG format (`.wpilog`).
 
-This tool allows you to take raw CAN bus logs from valid REV devices (Spark Max, Spark Flex, Servo Hub) and view them in standard FRC analysis tools like AdvantageScope.
+This tool allows you to take raw CAN bus logs from REV devices (SPARK MAX, SPARK Flex, Servo Hub, detached encoders and the A301) and view them in standard FRC analysis tools like AdvantageScope.
+
+It reads both REVLOG formats written by REVLib's `StatusLogger`:
+
+* **Version 1**, written by REVLib 2025 through 2027.0.0-alpha-8
+* **Version 2**, written by later releases
+
+Files using a newer major version are rejected with a message to update the converter.
+
+## Output
+
+| REVLOG data | WPILOG entries |
+| --- | --- |
+| Status frame signals | Version 2: `REV/<bus>/<device>-<number>/<signal>`, for example `REV/CAN_S0/Spark-3/APPLIED_OUTPUT`. Version 1: `REV/<device>-<number>/<signal>`. Faults and warnings go in `FAULT/` and `WARNING/` subfolders |
+| Firmware versions | `.../FIRMWARE` (string), written when the version changes |
+| Driver Station state (version 2) | `DS:controlWord/enabled` (boolean) and `DS:controlWord/robotMode` (string). AdvantageScope uses these to line the log up with other logs and to shade enabled periods |
+| Match information (version 2) | `DS:matchInfo/eventName`, `DS:matchInfo/matchType`, `DS:matchInfo/matchNumber` |
+| Logger events (version 2) | `REV/StatusLogger/Event` (`started`, `capturing`, `stopped`, `resumed`, `usb-removed`, `directory-changed`) |
+| Dropped frames (version 2) | `REV/StatusLogger/<bus>/DroppedFrames` (running total) |
+
+Devices are `Spark`, `ServoHub`, `Encoder` and `A301`.
 
 ## Usage
 
@@ -31,7 +51,10 @@ The tool supports Unix-style piping. You can pipe a binary file into the convert
 #### Options
 
   * `-o, --output <file>`: Specify the output filename. If omitted (and not piping to a file), the binary data is written to `stdout`.
+  * `--stats`: Print a summary of the REVLOG instead of converting it: format version, record counts and sizes, time span, frames per device, logger events, and known problems (for example timestamps from REVLib 2027 alphas, or a file that is mostly repeated firmware tables).
   * `-h, --help`: Display the help message.
+
+`revlog-converter --stats input.revlog`
 
 -----
 
@@ -59,3 +82,19 @@ async function convertFile() {
     console.error('Conversion failed:', err);
   }
 }
+```
+
+#### 2\. Summarizing a REVLOG
+
+```typescript
+import { readFileSync } from 'fs';
+import { analyzeREVLOG, formatStats } from '@rev-robotics/revlog-converter';
+
+const stats = analyzeREVLOG(readFileSync('./match.revlog'));
+console.log(formatStats(stats)); // or inspect stats.warnings, stats.devices, ...
+```
+
+## Development
+
+* `npm test` runs the tests. `test/fixtures/v1-baseline.json` holds the output of converter 1.0.5 for a version 1 file; signal output for version 1 files must keep matching it.
+* `npm run lint:check` and `npm run format:check` run the same checks as publishing.
