@@ -1,6 +1,6 @@
 {
   "name": "@rev-robotics/revlog-converter",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "author": "REV Robotics",
   "license": "BSD-3-Clause",
   "description": "Tool to parse and convert .revlog files produced by REVLib's StatusLogger to .wpilog files",
@@ -33,7 +33,8 @@
     "lint:check": "eslint 'src/**/*.ts'",
     "format": "prettier --write 'src/**/*.ts'",
     "format:check": "prettier --check 'src/**/*.ts'",
-    "dev": "tsx src/cli.ts"
+    "dev": "tsx src/cli.ts",
+    "test": "node --import tsx --test test/*.test.ts"
   },
   "devDependencies": {
     "@types/node": "^20.19.37",

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { parseREVLOG } from './lib/revlogParser.js';
+import { analyzeREVLOG, formatStats } from './lib/revlogStats.js';
 import { Readable, Writable, Transform } from 'stream';
 import fs from 'fs';
 
@@ -23,8 +24,28 @@ Arguments:
 Options:
   -o, --output     The path to the output .wpilog file.
                    If not provided, the output will be piped directly to stdout.
+  --stats          Print a summary of the REVLOG (records, devices, time
+                   span, logger events) and any known problems, instead
+                   of converting it.
   -h, --help       Show this help message.
     `);
+    return;
+  }
+
+  if (args.includes('--stats')) {
+    const files = args.filter((arg) => !arg.startsWith('-'));
+    let input: Buffer;
+    if (files.length === 1) {
+      input = fs.readFileSync(files[0]);
+    } else if (files.length === 0 && !process.stdin.isTTY) {
+      const chunks: Buffer[] = [];
+      for await (const chunk of process.stdin) chunks.push(chunk as Buffer);
+      input = Buffer.concat(chunks);
+    } else {
+      console.error('Error: --stats needs exactly one input file or stdin.');
+      process.exit(1);
+    }
+    process.stdout.write(formatStats(analyzeREVLOG(input)));
     return;
   }
 
