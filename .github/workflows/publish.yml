@@ -1,42 +1,118 @@
-name: Publish to NPM
+name: Publish to npm
 
 on:
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-  # Runs automatically when a new release is published
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Dry run (build and pack, but don't upload to npm)"
+        type: boolean
+        default: true
+
+# Never run two publishes at once, and never cancel one mid-flight
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
 
 jobs:
-  publish:
+  verify:
+    name: Verify (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Node.js for publishing
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20.x'
-        registry-url: 'https://registry.npmjs.org/'
-        cache: 'npm'
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Verify code quality before publishing
-      run: |
-        npm run format:check
-        npm run lint:check
+      - name: Check formatting
+        run: npm run format:check
 
-    - name: Build project
-      run: npm run build
+      - name: Lint
+        run: npm run lint:check
 
-    - name: Publish to NPM
-      run: npm publish --access public
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+  publish:
+    name: Publish
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write # required for npm trusted publishing (OIDC) + provenance
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      # Trusted publishing needs npm >= 11.5.1
+      - name: Ensure recent npm
+        run: npm install -g npm@^11.5.1
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Check release tag matches package.json version
+        if: github.event_name == 'release'
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          TAG_VERSION="${TAG#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Release tag '$TAG' does not match package.json version '$PKG_VERSION'"
+            exit 1
+          fi
+
+      - name: Determine dist-tag
+        id: dist
+        run: |
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          if [[ "$PKG_VERSION" == *-* ]]; then
+            echo "tag=next" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=latest" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Publishing $PKG_VERSION with dist-tag: $(tail -n1 "$GITHUB_OUTPUT" | cut -d= -f2)"
+
+      - name: Show package contents
+        run: npm pack --dry-run
+
+      - name: Publish to npm
+        env:
+          DIST_TAG: ${{ steps.dist.outputs.tag }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run }}
+        run: |
+          ARGS=(--access public --provenance --tag "$DIST_TAG")
+          if [ "$DRY_RUN" = "true" ]; then
+            ARGS+=(--dry-run)
+          fi
+          npm publish "${ARGS[@]}"
